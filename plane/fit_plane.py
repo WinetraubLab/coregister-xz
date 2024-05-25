@@ -1,3 +1,4 @@
+@ -1,119 +0,0 @@
 import numpy as np
 
 class FitPlane:
@@ -27,10 +28,11 @@ class FitPlane:
             fluorescence_image_points_on_line_pix, 
             photobleach_line_position_mm, 
             photobleach_line_group)
+            
+        # Make sure u has no z component. It will help make things standard
+        self._fit_from_photobleach_lines_z_from_no_shear_equal_size()
         
         # Fix z component
-        self.u[2] = 0
-        self.v[2] = 0.001
         self.h[2] = 0
         
     def _fit_from_photobleach_lines_xy(self, 
@@ -74,6 +76,30 @@ class FitPlane:
         self.u = np.array([x[0], x[1], np.nan])
         self.v = np.array([x[2], x[3], np.nan])
         self.h = np.array([x[4], x[5], np.nan])
+        
+    def _fit_from_photobleach_lines_z_from_no_shear_equal_size(self):
+        # Estimate z by solving equation A and equation B
+        u_x = self.u[0]
+        u_y = self.u[1]
+        v_x = self.v[0]
+        v_y = self.v[1]
+        def eq_A(u_x,u_y,v_x,v_y):
+            return u_x*v_x+u_y*v_y
+        def eq_B(u_x,u_y,v_x,v_y):
+            return u_x**2-v_x**2+u_y**2-v_y**2
+        def eq_vz(u_x,u_y,v_x,v_y):
+            A = eq_A(u_x,u_y,v_x,v_y)
+            B = eq_B(u_x,u_y,v_x,v_y)
+            return 1/np.sqrt(2)*np.sqrt(B+np.sqrt(B**2-4*A**2))
+            
+        # Estimate z component
+        v_z = eq_vz(u_x,u_y,v_x,v_y)
+        self.u[2] = -eq_A(u_x,u_y,v_x,v_y)/v_z
+        self.v[2] = v_z
+        
+        # Check consistency assumptions
+        assert(np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.01)
+        assert(np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.01)
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """
