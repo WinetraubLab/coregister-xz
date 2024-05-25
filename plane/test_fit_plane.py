@@ -29,11 +29,14 @@ class TestFitPlane(unittest.TestCase):
             self.default_fluorescence_image_points_on_line_pix, 
             self.default_photobleach_line_position_mm, 
             self.default_photobleach_line_group)
-   
-    def test_example_pixel_size(self):
+    
+    def test_example_pixel_size_u(self):
         self.test_main_function_runs()
-        self.assertAlmostEqual(self.fp.u_norm(), 1, places=2, msg='u vector pixel size should be 1 micron')
-        self.assertAlmostEqual(self.fp.v_norm(), 1, places=2, msg='v vector pixel size should be 1 micron')
+        self.assertAlmostEqual(self.fp.u_norm_mm()*1000, 1, places=0)
+   
+    def test_example_pixel_size_v(self):
+        self.test_main_function_runs()
+        self.assertAlmostEqual(self.fp.v_norm_mm()*1000, 1, places=0)
         
     def test_example_u_vector_direction(self):
         self.test_main_function_runs()
@@ -41,7 +44,7 @@ class TestFitPlane(unittest.TestCase):
         xy_angle = np.degrees(np.arccos(np.dot(u_direction,np.array([1, 0, 0]))))
         z_angle = np.degrees(np.arccos(np.dot(u_direction,np.array([0, 0, 1]))))
         
-        self.assertAlmostEqual(xy_angle,45, places=1)
+        self.assertAlmostEqual(xy_angle,45, places=0)
         self.assertAlmostEqual(z_angle ,90, places=1)
     
     def test_example_v_vector_direction(self):

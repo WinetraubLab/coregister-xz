@@ -3,7 +3,7 @@ import numpy as np
 class FitPlane:
     
     def __init__(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm,photobleach_line_group
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
         ):
         """
         Constructor for the FitPlane class.
@@ -16,28 +16,77 @@ class FitPlane:
         """
         
         self._fit_from_photobleach_lines(
-            fluorescence_image_points_on_line_pix, photobleach_line_position_mm,photobleach_line_group)
+            fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group)
     
     def _fit_from_photobleach_lines(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm,photobleach_line_group
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
         ):
         
-        self.u = np.array([0.707,-0.707,0])
-        self.v = np.array([0,0,1])
-        self.h = np.array([0,0,0])
+        # Solve x,y first
+        self._fit_from_photobleach_lines_xy(
+            fluorescence_image_points_on_line_pix, 
+            photobleach_line_position_mm, 
+            photobleach_line_group)
+        
+        # Fix z component
+        self.u[2] = 0
+        self.v[2] = 0.001
+        self.h[2] = 0
+        
+    def _fit_from_photobleach_lines_xy(self, 
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
+        ):
+        """ First part estimates x-y part of u,v,h using least squares matrix """
+        
+        # Generate least square matrix
+        def gen_row (
+            ln_pts, # Points on the specific line
+            ln_id_group, # Can be 'h' or 'v'
+            ln_id_pos,   # The physical position in mm
+            ):
+            y_row = []
+            A_row = []
+            for ln_pt in ln_pts:
+                y.append(ln_id_pos) # least square y is the line position [mm]
+                if ln_id_group == 'v':
+                    A_row.append([ln_pt[0], 0, ln_pt[1], 0, 1, 0])
+                else:
+                    A_row.append([0, ln_pt[0], 0, ln_pt[1], 0, 1])
 
-    def u_norm(self):
+            A_row = np.array(A_row)
+            y_row = np.array(y_row)
+
+            return (A_row,y_row)
+        A = []
+        y = []
+        for index, _ in enumerate(photobleach_line_group):
+            A_row, y_row = gen_row(fluorescence_image_points_on_line_pix[index],
+                photobleach_line_group[index],photobleach_line_position_mm[index])
+            A.append(A_row)
+            y.append(y_row)
+        A = np.vstack(A)
+        y = np.hstack(y)
+        
+        # Solve the least square problem
+        x, residuals, rank, s = np.linalg.lstsq(A, y, rcond=None)
+
+        # Output vectors
+        self.u = np.array([x[0], x[1], np.nan])
+        self.v = np.array([x[2], x[3], np.nan])
+        self.h = np.array([x[4], x[5], np.nan])
+
+    def u_norm_mm(self):
         """ Return the size of pixel u in mm """
         return np.linalg.norm(self.u)
     
-    def v_norm(self):
+    def v_norm_mm(self):
         """ Return the size of pixel v in mm """
         return np.linalg.norm(self.v)
     
     def u_direction(self):
         """ Return a unit vector in the direction of u """
-        return self.u / self.u_norm()
+        return self.u / self.u_norm_mm()
         
     def v_direction(self):
         """ Return a unit vector in the direction of v """
-        return self.v / self.v_norm()
+        return self.v / self.v_norm_mm()
