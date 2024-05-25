@@ -1,4 +1,3 @@
-@ -1,119 +0,0 @@
 import numpy as np
 
 class FitPlane:
