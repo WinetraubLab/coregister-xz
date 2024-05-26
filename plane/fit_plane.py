@@ -188,3 +188,39 @@ class FitPlane:
         v_pix = np.dot(point_mm-self.h,v_hat)/v_norm
         
         return np.array([u_pix, v_pix])
+        
+    def get_xy_projection(self, min_x_mm=None, max_x_mm=None):
+        """ When lookin at the pattern from above, return two points from the projected line 
+        The line would go from point1 --> point2 where u value increases.
+        
+        USAGE:
+            pt1, pt2 = get_xy_projection()
+            pt1, pt2 = get_xy_projection(min_x_mm = 0, max_x_mm = 10)
+            
+        INPUTS:
+            min_x_mm, max_x_mm - if defined, pt1[0] = min_x_mm, pt2[0] = max_x_mm. If not will use (0,0) --> (c_u,c_v)
+        """
+        
+        # Get the points on the plane
+        if min_x_mm is None or max_x_mm is None:
+            # No clear user limits
+            pt1_u, pt2_u = min(0, self.recomended_center_pix[0]), max(0, self.recomended_center_pix[0])
+        else:
+            # We need to find where min_x_mm, min_y_mm are on the plane.
+            # To do so, we get the equation ax+by+cz+d=0, and set x to the limits, and z to 0 to find y.
+            a,b,c,d = self.plane_equation()
+            min_y_mm = -(d+a*min_x_mm)/b
+            max_y_mm = -(d+a*max_x_mm)/b
+            
+            # Find u,v on that plane
+            tmp1 = self.get_uv_from_xyz([min_x_mm, min_y_mm, 0])
+            tmp2 = self.get_uv_from_xyz([max_x_mm, max_y_mm, 0])
+            pt1_u, pt2_u = min(tmp1[0],tmp2[0]), max(tmp1[0],tmp2[0])
+        pt12_v = self.recomended_center_pix[1]
+        
+        # Figure out u,v on the plane that the points correspond to
+        pt1 = self.get_xyz_from_uv([pt1_u, pt12_v])
+        pt2 = self.get_xyz_from_uv([pt2_u, pt12_v])
+        
+        return (pt1[:2],pt2[:2])
+    

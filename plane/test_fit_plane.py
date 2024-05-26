@@ -136,9 +136,14 @@ class TestFitPlane(unittest.TestCase):
         v = 20
         pos_xyz = self.fp.get_xyz_from_uv([u,v])
         pos_uv = self.fp.get_uv_from_xyz(pos_xyz)
+        pos_xyz2 = self.fp.get_xyz_from_uv(pos_uv)
         
         self.assertAlmostEqual(pos_uv[0], u, places=1)
         self.assertAlmostEqual(pos_uv[1], v, places=1)
+        
+        self.assertAlmostEqualRelative(pos_xyz[0], pos_xyz2[0] , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(pos_xyz[1], pos_xyz2[1] , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(pos_xyz[2], pos_xyz2[2] , rel_tol=0.1) # Accurate up to 10%
         
     def test_check_000_and_physical_conversion(self):
         pos_uv = self.fp.get_uv_from_xyz([0,0,0])
@@ -170,5 +175,39 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqualRelative(self.fp.recomended_center_pix[0], np.mean(u_coordinates) , rel_tol=0.1) # Accurate up to 10%
         self.assertAlmostEqualRelative(self.fp.recomended_center_pix[1], np.mean(v_coordinates) , rel_tol=0.1) # Accurate up to 10%
 
+    def verify_two_2D_vectors_point_in_same_direction(self,v1,v2):
+        
+        # Gather 2D version of each vector
+        v1_hat = v1[:2]/np.linalg.norm(v1[:2])
+        v2_hat = v2[:2]/np.linalg.norm(v2[:2])
+        
+        # Compute angle between and make sure it's almost 0
+        angle = np.degrees(np.arccos(np.dot(v1_hat,v2_hat)))
+        self.assertAlmostEqual(angle, 0, places=0)
+        
+    
+    def test_xy_projection(self):
+        pt1, pt2 = self.fp.get_xy_projection()
+        
+        self.assertEqual(len(pt1),2) # make sure returning values are only x,y
+        self.assertEqual(len(pt2),2) # make sure returning values are only x,y
+        
+        # Verify that pt1-->pt2 is at the same direction as u vector
+        self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
+    
+    def test_xy_projection_with_limits(self):
+        x_min_mm = -1
+        x_max_mm = 1
+        
+        pt1, pt2 = self.fp.get_xy_projection(min_x_mm=x_min_mm, max_x_mm=x_max_mm)
+        pt_min_x, pt_max_x = min(pt1[0], pt2[0]), max(pt1[0], pt2[0])
+        
+        # Check that x limits are "respected"
+        self.assertAlmostEqualRelative(x_min_mm, pt_min_x, rel_tol=0.01)
+        self.assertAlmostEqualRelative(x_max_mm, pt_max_x, rel_tol=0.01)
+        
+        # Verify that pt1-->pt2 is at the same direction as u vector
+        self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
+        
 if __name__ == '__main__':
     unittest.main()
