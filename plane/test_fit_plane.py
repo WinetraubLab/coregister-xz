@@ -28,7 +28,8 @@ class TestFitPlane(unittest.TestCase):
         self.fp = FitPlane(
             self.default_fluorescence_image_points_on_line_pix, 
             self.default_photobleach_line_position_mm, 
-            self.default_photobleach_line_group)
+            self.default_photobleach_line_group,
+            )
     
     def test_example_pixel_size_u(self):
         self.test_main_function_runs()
@@ -46,13 +47,30 @@ class TestFitPlane(unittest.TestCase):
         
         self.assertAlmostEqual(xy_angle,45, places=0)
         self.assertAlmostEqual(z_angle ,90, places=1)
+        
+    def test_plane_normal(self):
+        f = FitPlane([1,0,0],[0,0,1],[10,0,0],method='u,v,h directly')
+        n = f.normal_direction()
+        
+        error_angle = np.degrees(np.arccos(np.dot(n,np.array([0, -1, 0]))))
+        self.assertAlmostEqual(error_angle, 0, places=1)
+
+    def test_plane_equation(self):
+        # Test with plane z=50
+        f = FitPlane([1,0,0],[0,1,0],[10,0,50],method='u,v,h directly')
+        a,b,c,d = f.plane_equation()
+        
+        self.assertAlmostEqual(a, 0, places=1)
+        self.assertAlmostEqual(b, 0, places=1)
+        self.assertAlmostEqual(c, 1, places=1)
+        self.assertAlmostEqual(d, -50, places=1)
     
     def test_example_v_vector_direction(self):
         self.test_main_function_runs()
         v_direction = self.fp.v_direction()
         z_angle = np.degrees(np.arccos(np.dot(v_direction,np.array([0, 0, 1]))))
         
-        self.assertAlmostEqual(z_angle ,0, places=1)    
+        self.assertAlmostEqual(z_angle, 0, places=1)    
     
     def test_tilted_image(self):
         # For this test, we will look at the case where fluorescence image is tilted.
@@ -75,7 +93,8 @@ class TestFitPlane(unittest.TestCase):
             fp = FitPlane(
                 rotated_fluorescence_image_points_on_line_pix, 
                 self.default_photobleach_line_position_mm, 
-                self.default_photobleach_line_group)
+                self.default_photobleach_line_group,
+                method='points on photobleach lines')
 
 if __name__ == '__main__':
     unittest.main()

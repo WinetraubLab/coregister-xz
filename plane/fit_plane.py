@@ -2,23 +2,29 @@ import numpy as np
 
 class FitPlane:
     
-    def __init__(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
-        ):
+    def __init__(self, *args, method="points on photobleach lines") :
         """
-        Constructor for the FitPlane class.
+        Constructor for the FitPlane class based on method
 
-        :param fluorescence_image_points_on_line_pix: For each of the photobleach lines, 
-            find at least two points in the fluorescence image. Mark the coordinates as pixel values
-            l1 = [[x1,y1],[x2,y2],...] and create an array of those [l1,l2,...,ln]
-        :param photobleach_line_position_mm: an array defining the position (in mm) of each of the photobleach line positions 
-        :param photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...] etc
+        If method="points on photobleach lines", Inputs:
+            fluorescence_image_points_on_line_pix: For each of the photobleach lines, 
+                find at least two points in the fluorescence image. Mark the coordinates as pixel values
+                l1 = [[x1,y1],[x2,y2],...] and create an array of those [l1,l2,...,ln]
+            photobleach_line_position_mm: an array defining the position (in mm) of each of the photobleach line positions 
+            photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...] etc
+        If method="u,v,h directly", Inputs:
+            u,v,h in mm
         """
-        
-        self._fit_from_photobleach_lines(
-            fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group)
+        if method == "points on photobleach lines":
+            self._fit_from_points_on_photobleach_lines(args[0],args[1],args[2])
+        elif method == "u,v,h directly":
+            self.u = np.array(args[0])
+            self.v = np.array(args[1])
+            self.h = np.array(args[2])
+        else:
+            raise ValueError("Invalid initialization method: %s" % method)
     
-    def _fit_from_photobleach_lines(self, 
+    def _fit_from_points_on_photobleach_lines(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
         override_value_cheks=False):
         
@@ -123,3 +129,18 @@ class FitPlane:
     def v_direction(self):
         """ Return a unit vector in the direction of v """
         return self.v / self.v_norm_mm()
+        
+    def normal_direction(self):
+        """ Return a unit vector in the direction of the normal """
+        return np.cross(self.u_direction(), self.v_direction())
+        
+    def plane_equation(self):
+        """ Convert u,v,h to a plane equation ax+by+cz-d=0.
+        a,b,c are unitless and d has units of mm"""
+        normal_vec = self.normal_direction()
+        a, b, c = normal_vec
+        d = -np.dot(normal_vec, self.h)
+        
+        return a,b,c,d
+        
+    
