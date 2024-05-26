@@ -189,33 +189,63 @@ class FitPlane:
         
         return np.array([u_pix, v_pix])
         
-    def get_xy_projection(self, min_x_mm=None, max_x_mm=None):
+    def get_xy_projection(self, min_x_mm=None, max_x_mm=None, min_y_mm=None, max_y_mm=None):
         """ When lookin at the pattern from above, return two points from the projected line 
         The line would go from point1 --> point2 where u value increases.
         
         USAGE:
             pt1, pt2 = get_xy_projection()
-            pt1, pt2 = get_xy_projection(min_x_mm = 0, max_x_mm = 10)
+            pt1, pt2 = get_xy_projection(min_x_mm = 0, max_x_mm = 10, min_y_mm = 0, max_y_mm = 10)
             
         INPUTS:
-            min_x_mm, max_x_mm - if defined, pt1[0] = min_x_mm, pt2[0] = max_x_mm. If not will use (0,0) --> (c_u,c_v)
+            If none of the optional inputs are defined then line will be (u,v): (0,0) --> (c_u,c_v)
+            If min_x_mm, max_x_mm are defined pt1[0] = min_x_mm, pt2[0] = max_x_mm. 
+            If min_y_mm, max_y_mm are defined pt1[1] = min_y_mm, pt2[1] = max_y_mm. 
+            If both sets of x and y are defined, we will use the outmost inclusive set
         """
-        
-        # Get the points on the plane
-        if min_x_mm is None or max_x_mm is None:
+        # Get the points on the plane that satisfy the x condition
+        no_x_limit = min_x_mm is None or max_x_mm is None
+        if no_x_limit:
             # No clear user limits
-            pt1_u, pt2_u = min(0, self.recomended_center_pix[0]), max(0, self.recomended_center_pix[0])
+            pt1_u_x = np.Inf
+            pt2_u_x = -np.Inf
         else:
-            # We need to find where min_x_mm, min_y_mm are on the plane.
+            # We need to find where min_x_mm, max_x_mm are on the plane.
             # To do so, we get the equation ax+by+cz+d=0, and set x to the limits, and z to 0 to find y.
             a,b,c,d = self.plane_equation()
-            min_y_mm = -(d+a*min_x_mm)/b
-            max_y_mm = -(d+a*max_x_mm)/b
+            min_x_y_mm = -(d+a*min_x_mm)/b
+            max_x_y_mm = -(d+a*max_x_mm)/b
             
             # Find u,v on that plane
-            tmp1 = self.get_uv_from_xyz([min_x_mm, min_y_mm, 0])
-            tmp2 = self.get_uv_from_xyz([max_x_mm, max_y_mm, 0])
-            pt1_u, pt2_u = min(tmp1[0],tmp2[0]), max(tmp1[0],tmp2[0])
+            tmp1 = self.get_uv_from_xyz([min_x_mm, min_x_y_mm, 0])
+            tmp2 = self.get_uv_from_xyz([max_x_mm, max_x_y_mm, 0])
+            pt1_u_x, pt2_u_x = min(tmp1[0],tmp2[0]), max(tmp1[0],tmp2[0])
+        
+        # Get the points on the plane that satisfy the y condition
+        no_y_limit = min_y_mm is None or max_y_mm is None
+        if no_y_limit:
+            # No clear user limits
+            pt1_u_y = np.Inf
+            pt2_u_y = -np.Inf
+        else:
+            # We need to find where min_y_mm, max_y_mm are on the plane.
+            # To do so, we get the equation ax+by+cz+d=0, and set y to the limits, and z to 0 to find x.
+            a,b,c,d = self.plane_equation()
+            min_y_x_mm = -(d+b*min_y_mm)/a
+            max_y_x_mm = -(d+b*max_y_mm)/a
+            
+            # Find u,v on that plane
+            tmp1 = self.get_uv_from_xyz([min_y_x_mm, min_y_mm, 0])
+            tmp2 = self.get_uv_from_xyz([max_y_x_mm, max_y_mm, 0])
+            pt1_u_y, pt2_u_y = min(tmp1[0],tmp2[0]), max(tmp1[0],tmp2[0]) 
+
+        if no_x_limit and no_y_limit:
+            # No limits found, use default values 
+            pt1_u, pt2_u = min(0, self.recomended_center_pix[0]), max(0, self.recomended_center_pix[0])
+        else:        
+            # Aggregate all points to find the maximum bounds
+            pt1_u = min(pt1_u_x,pt1_u_y)
+            pt2_u = max(pt2_u_x,pt2_u_y)
         pt12_v = self.recomended_center_pix[1]
         
         # Figure out u,v on the plane that the points correspond to
@@ -223,4 +253,3 @@ class FitPlane:
         pt2 = self.get_xyz_from_uv([pt2_u, pt12_v])
         
         return (pt1[:2],pt2[:2])
-    

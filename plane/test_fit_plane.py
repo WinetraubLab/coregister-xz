@@ -3,6 +3,8 @@ import numpy as np
 import numpy.testing as npt
 import unittest
 from fit_plane import FitPlane
+import plot_fit_plane
+
 
 class TestFitPlane(unittest.TestCase):
 
@@ -195,7 +197,7 @@ class TestFitPlane(unittest.TestCase):
         # Verify that pt1-->pt2 is at the same direction as u vector
         self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
     
-    def test_xy_projection_with_limits(self):
+    def test_xy_projection_with_x_limits(self):
         x_min_mm = -1
         x_max_mm = 1
         
@@ -208,6 +210,23 @@ class TestFitPlane(unittest.TestCase):
         
         # Verify that pt1-->pt2 is at the same direction as u vector
         self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
+        
+    def test_xy_projection_with_y_limits(self):
+        y_min_mm = -1
+        y_max_mm = 1
+        
+        pt1, pt2 = self.fp.get_xy_projection(min_y_mm=y_min_mm, max_y_mm=y_max_mm)
+        pt_min_y, pt_max_y = min(pt1[1], pt2[1]), max(pt1[1], pt2[1])
+        
+        # Check that x limits are "respected"
+        self.assertAlmostEqualRelative(y_min_mm, pt_min_y, rel_tol=0.01)
+        self.assertAlmostEqualRelative(y_max_mm, pt_max_y, rel_tol=0.01)
+        
+        # Verify that pt1-->pt2 is at the same direction as u vector
+        self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
+        
+    def test_plot_fit_plane_doesnt_throw_an_error(self):
+        plot_fit_plane.plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
         
 if __name__ == '__main__':
     unittest.main()
