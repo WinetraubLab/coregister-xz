@@ -103,6 +103,55 @@ class TestFitPlane(unittest.TestCase):
                 self.default_photobleach_line_position_mm, 
                 self.default_photobleach_line_group,
                 method='points on photobleach lines')
+    
+    def test_conversion_pixel_position_to_physical_h(self):
+        self.test_main_function_runs()
+        
+        pos_xyz = self.fp.get_xyz_from_uv([0,0])
+        self.assertAlmostEqual(pos_xyz[0], self.fp.h[0], places=1)
+        self.assertAlmostEqual(pos_xyz[1], self.fp.h[1], places=1)
+        self.assertAlmostEqual(pos_xyz[2], self.fp.h[2], places=1)
+    
+    def test_conversion_pixel_position_to_physical_u(self):
+        self.test_main_function_runs()
+        
+        pos_xyz_1 = self.fp.get_xyz_from_uv([0,0])
+        pos_xyz_2 = self.fp.get_xyz_from_uv([1,0])
+        self.assertAlmostEqual(pos_xyz_2[0] - pos_xyz_1[0], self.fp.u[0], places=1)
+        self.assertAlmostEqual(pos_xyz_2[1] - pos_xyz_1[1], self.fp.u[1], places=1)
+        self.assertAlmostEqual(pos_xyz_2[2] - pos_xyz_1[2], self.fp.u[2], places=1)
+        
+    def test_conversion_pixel_position_to_physical_v(self):
+        self.test_main_function_runs()
+        
+        pos_xyz_1 = self.fp.get_xyz_from_uv([0,0])
+        pos_xyz_2 = self.fp.get_xyz_from_uv([0,1])
+        self.assertAlmostEqual(pos_xyz_2[0] - pos_xyz_1[0], self.fp.v[0], places=1)
+        self.assertAlmostEqual(pos_xyz_2[1] - pos_xyz_1[1], self.fp.v[1], places=1)
+        self.assertAlmostEqual(pos_xyz_2[2] - pos_xyz_1[2], self.fp.v[2], places=1)
+    
+    def test_conversion_pixel_position_to_physical_and_back(self):
+        self.test_main_function_runs()
+        
+        u = 12
+        v = 20
+        pos_xyz = self.fp.get_xyz_from_uv([u,v])
+        pos_uv = self.fp.get_uv_from_xyz(pos_xyz)
+        
+        self.assertAlmostEqual(pos_uv[0], u, places=1)
+        self.assertAlmostEqual(pos_uv[1], v, places=1)
+        
+    def test_conversion_physical_to_pixel_when_point_is_off_plane(self):
+        self.test_main_function_runs()
+        
+        u = 12
+        v = 20
+        pos_xyz = self.fp.get_xyz_from_uv([u,v])
+        pos_xyz = pos_xyz + self.fp.normal_direction()*2 # Move point away from plane
+        pos_uv = self.fp.get_uv_from_xyz(pos_xyz)
+        
+        self.assertAlmostEqual(pos_uv[0], u, places=1)
+        self.assertAlmostEqual(pos_uv[1], v, places=1)
 
 if __name__ == '__main__':
     unittest.main()
