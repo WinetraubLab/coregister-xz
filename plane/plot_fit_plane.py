@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from fit_plane import FitPlane
+from plane.fit_plane import FitPlane
 
 def plot_fit_plane(
     fp, #FitPlane or array of FitPlanes

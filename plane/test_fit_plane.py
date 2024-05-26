@@ -2,8 +2,8 @@ import math
 import numpy as np
 import numpy.testing as npt
 import unittest
-from fit_plane import FitPlane
-import plot_fit_plane
+from plane.fit_plane import FitPlane
+from plane.plot_fit_plane import plot_fit_plane
 
 
 class TestFitPlane(unittest.TestCase):
@@ -246,7 +246,7 @@ class TestFitPlane(unittest.TestCase):
         self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
-        plot_fit_plane.plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
+        plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
         
 if __name__ == '__main__':
     unittest.main()
