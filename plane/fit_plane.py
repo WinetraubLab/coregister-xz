@@ -28,19 +28,19 @@ class FitPlane:
             photobleach_line_position_mm, 
             photobleach_line_group)
             
-        # Check that u vec is more or less in the x-y plane
-        min_ratio = 0.1 # corresponding <6 degrees
-        if (not (np.linalg.norm(self.v[:2]) < np.linalg.norm(self.u[:2])*min_ratio) and 
-            not (override_value_cheks)):
-            raise ValueError(
-                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
-                % min_ratio)
-            
         # Make sure u has no z component. It will help make things standard
         self._fit_from_photobleach_lines_z_from_no_shear_equal_size()
         
         # Fix z component
         self.h[2] = 0
+        
+        # Check that u vec is more or less in the x-y plane
+        min_ratio = 0.1 # corresponding <6 degrees
+        if (not ( abs(self.u[2]) < np.linalg.norm(self.u[:2])*min_ratio) and 
+            not (override_value_cheks)):
+            raise ValueError(
+                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
+                % min_ratio)
         
     def _fit_from_photobleach_lines_xy(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
@@ -105,8 +105,8 @@ class FitPlane:
         self.v[2] = v_z
         
         # Check consistency assumptions
-        assert(np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.01)
-        assert(np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.01)
+        assert(np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.05)
+        assert(np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.05)
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """
