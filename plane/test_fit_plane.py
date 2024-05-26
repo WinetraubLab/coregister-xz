@@ -48,7 +48,7 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(xy_angle,45, places=0)
         self.assertAlmostEqual(z_angle ,90, places=1)
         
-    def test_plane_normal(self):
+    def test_plane_normal_computed_correctly(self):
         f = FitPlane([1,0,0],[0,0,1],[10,0,0],method='u,v,h directly')
         n = f.normal_direction()
         
@@ -70,7 +70,15 @@ class TestFitPlane(unittest.TestCase):
         v_direction = self.fp.v_direction()
         z_angle = np.degrees(np.arccos(np.dot(v_direction,np.array([0, 0, 1]))))
         
-        self.assertAlmostEqual(z_angle, 0, places=1)    
+        self.assertAlmostEqual(z_angle, 0, places=1)
+
+    def test_u_v_orthogonal_check(self):
+        with self.assertRaises(ValueError) as context:
+            f = FitPlane([1,0,0],[1,0,0],[10,0,0],method='u,v,h directly')
+    
+    def test_u_v_nrom_check(self):
+        with self.assertRaises(ValueError) as context:
+            f = FitPlane([1,0,0],[0,0,2],[10,0,0],method='u,v,h directly')
     
     def test_tilted_image(self):
         # For this test, we will look at the case where fluorescence image is tilted.
