@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import numpy.testing as npt
 import unittest
@@ -32,6 +33,11 @@ class TestFitPlane(unittest.TestCase):
             self.default_photobleach_line_position_mm, 
             self.default_photobleach_line_group,
             )
+            
+    def assertAlmostEqualRelative(self, first, second, rel_tol=1e-3, msg=None):
+        if not math.isclose(first, second, rel_tol=rel_tol):
+            standard_msg = f'{first} != {second} within {rel_tol} relative tolerance'
+            self.fail(self._formatMessage(msg, standard_msg))
                 
     def test_main_function_runs(self):
         self.fit_default_plane()
@@ -134,6 +140,14 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(pos_uv[0], u, places=1)
         self.assertAlmostEqual(pos_uv[1], v, places=1)
         
+    def test_check_000_and_physical_conversion(self):
+        pos_uv = self.fp.get_uv_from_xyz([0,0,0])
+        pos_xyz = self.fp.get_xyz_from_uv(pos_uv)
+        pos_xyz = pos_xyz/np.linalg.norm(pos_xyz)
+        
+        norm_angle = np.degrees(np.arccos(np.dot(pos_xyz, -self.fp.normal_direction())))
+        self.assertAlmostEqual(norm_angle, 0, places=1)
+        
     def test_conversion_physical_to_pixel_when_point_is_off_plane(self):
         u = 12
         v = 20
@@ -143,6 +157,18 @@ class TestFitPlane(unittest.TestCase):
         
         self.assertAlmostEqual(pos_uv[0], u, places=1)
         self.assertAlmostEqual(pos_uv[1], v, places=1)
+        
+    def test_recomended_center_pix(self):
+        # Modify the pen & paper solution such that lines are centered around origin.
+        # In this case, recommended center should be just above origin (0,0,0)
+        self.default_photobleach_line_position_mm = [ -0.1, 0, 0.1, 0.2, 0.1, 0, -0.2]
+        self.fit_default_plane()
+    
+        u_coordinates = np.array([item[0] for sublist in self.default_fluorescence_image_points_on_line_pix for item in sublist])
+        v_coordinates = np.array([item[1] for sublist in self.default_fluorescence_image_points_on_line_pix for item in sublist])
+        
+        self.assertAlmostEqualRelative(self.fp.recomended_center_pix[0], np.mean(u_coordinates) , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(self.fp.recomended_center_pix[1], np.mean(v_coordinates) , rel_tol=0.1) # Accurate up to 10%
 
 if __name__ == '__main__':
     unittest.main()

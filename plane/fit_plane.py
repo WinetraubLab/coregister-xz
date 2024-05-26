@@ -21,6 +21,7 @@ class FitPlane:
             self.u = np.array(args[0])
             self.v = np.array(args[1])
             self.h = np.array(args[2])
+            self.recomended_center_pix = np.array([0,0])
         else:
             raise ValueError("Invalid initialization method: %s" % method)
             
@@ -29,7 +30,7 @@ class FitPlane:
     def _fit_from_points_on_photobleach_lines(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group):
         """ This function initialize FitPlane by points on photobleach lines.
-        It sets self values of u,v,h"""
+        It sets self values of u,v,h and recomended_center_pix point in the fluorescence image c=(cu,cv)"""
         
         # Solve x,y first
         self._fit_from_photobleach_lines_xy(
@@ -43,6 +44,17 @@ class FitPlane:
         # Fix z component
         self.h[2] = 0
         
+        # Check
+        self._check_u_v_consistency_assumptions()
+        
+        # Find recomended_center according to this logic:
+        # c_u - according to the location that norm hits the plane
+        # c_v - center of the fluorescence_image_points_on_line_pix
+        v_coordinates = np.array([item[1] for sublist in fluorescence_image_points_on_line_pix for item in sublist])
+        c_v = np.mean(v_coordinates)
+        o = self.get_uv_from_xyz([0,0,0])
+        c_u = o[0]
+        self.recomended_center_pix = np.array([c_u, c_v])
         
     def _fit_from_photobleach_lines_xy(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
