@@ -23,10 +23,13 @@ class FitPlane:
             self.h = np.array(args[2])
         else:
             raise ValueError("Invalid initialization method: %s" % method)
+            
+        self._check_u_v_consistency_assumptions()
     
     def _fit_from_points_on_photobleach_lines(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
-        override_value_cheks=False):
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group):
+        """ This function initialize FitPlane by points on photobleach lines.
+        It sets self values of u,v,h"""
         
         # Solve x,y first
         self._fit_from_photobleach_lines_xy(
@@ -40,13 +43,6 @@ class FitPlane:
         # Fix z component
         self.h[2] = 0
         
-        # Check that u vec is more or less in the x-y plane
-        min_ratio = 0.1 # corresponding <6 degrees
-        if (not ( abs(self.u[2]) < np.linalg.norm(self.u[:2])*min_ratio) and 
-            not (override_value_cheks)):
-            raise ValueError(
-                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
-                % min_ratio)
         
     def _fit_from_photobleach_lines_xy(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
@@ -109,10 +105,26 @@ class FitPlane:
         v_z = eq_vz(u_x,u_y,v_x,v_y)
         self.u[2] = -eq_A(u_x,u_y,v_x,v_y)/v_z
         self.v[2] = v_z
+
+    def _check_u_v_consistency_assumptions(self, skip_value_cheks=False):
+        """ Check u,v assumptions """
         
-        # Check consistency assumptions
-        assert(np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.05)
-        assert(np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.05)
+        # Skip
+        if skip_value_cheks:
+            return
+    
+        # Check u and v are orthogonal and have the same norm
+        if not (np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.05):
+            raise ValueError('u and v should have the same norm')
+        if not (np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.05):
+            raise ValueError('u must be orthogonal to v')
+        
+        # Check that u vec is more or less in the x-y plane
+        min_ratio = 0.1 # corresponding <6 degrees
+        if not ( abs(self.u[2]) < np.linalg.norm(self.u[:2])*min_ratio):
+            raise ValueError(
+                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
+                % min_ratio)
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """
@@ -136,11 +148,31 @@ class FitPlane:
         
     def plane_equation(self):
         """ Convert u,v,h to a plane equation ax+by+cz-d=0.
-        a,b,c are unitless and d has units of mm"""
+        a,b,c are unitless and d has units of mm """
         normal_vec = self.normal_direction()
         a, b, c = normal_vec
         d = -np.dot(normal_vec, self.h)
         
         return a,b,c,d
         
+    def get_xyz_from_uv(self, point_pix):
+        """ Get the 3D physical coordinates of a specific pixel in the image [u_pix, v_pix] """
+        u_pix = point_pix[0]
+        v_pix = point_pix[1]
+        return (self.u*u_pix + self.v*v_pix + self.h)
     
+    def get_uv_from_xyz(self, point_mm):
+        """ Get the u,v coordinates on an image from a point in space, if point is outside the plane, return the u,v of the closest point """
+        
+        # Assuming u is orthogonal to v (as it shuld) for this function to work
+        self._check_u_v_consistency_assumptions()
+        
+        u_hat = self.u_direction()
+        u_norm = self.u_norm_mm()
+        u_pix = np.dot(point_mm-self.h,u_hat)/u_norm
+        
+        v_hat = self.v_direction()
+        v_norm = self.v_norm_mm()
+        v_pix = np.dot(point_mm-self.h,v_hat)/v_norm
+        
+        return np.array([u_pix, v_pix])
