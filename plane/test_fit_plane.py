@@ -88,6 +88,26 @@ class TestFitPlane(unittest.TestCase):
     def test_u_v_nrom_check(self):
         with self.assertRaises(ValueError) as context:
             f = FitPlane([1,0,0],[0,0,2],[10,0,0],method='u,v,h directly')
+            
+    def test_different_number_of_inputs_elements(self):
+        with self.assertRaises(ValueError) as context:
+            fp = FitPlane(
+                self.default_fluorescence_image_points_on_line_pix[1:], 
+                self.default_photobleach_line_position_mm, 
+                self.default_photobleach_line_group,
+                method='points on photobleach lines')
+        with self.assertRaises(ValueError) as context:
+            fp = FitPlane(
+                self.default_fluorescence_image_points_on_line_pix, 
+                self.default_photobleach_line_position_mm[1:], 
+                self.default_photobleach_line_group,
+                method='points on photobleach lines')
+        with self.assertRaises(ValueError) as context:
+            fp = FitPlane(
+                self.default_fluorescence_image_points_on_line_pix, 
+                self.default_photobleach_line_position_mm, 
+                self.default_photobleach_line_group[1:],
+                method='points on photobleach lines')
     
     def test_tilted_image(self):
         # For this test, we will look at the case where fluorescence image is tilted.

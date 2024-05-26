@@ -32,6 +32,11 @@ class FitPlane:
         """ This function initialize FitPlane by points on photobleach lines.
         It sets self values of u,v,h and recomended_center_pix point in the fluorescence image c=(cu,cv)"""
         
+        if (len(fluorescence_image_points_on_line_pix) != len(photobleach_line_position_mm) or
+            len(fluorescence_image_points_on_line_pix) != len(photobleach_line_group)):
+            raise ValueError("Number of lines should be the same between " + 
+                "fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group")
+        
         # Solve x,y first
         self._fit_from_photobleach_lines_xy(
             fluorescence_image_points_on_line_pix, 
