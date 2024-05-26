@@ -259,14 +259,18 @@ class FitPlane:
         
         return (pt1[:2],pt2[:2])
         
+    def distance_from_origin_mm(self):
+        """ Compute a signed distance from origin """
+        return np.dot(self.h, self.normal_direction())
+    
     def xy_rotation_deg(self):
         """ When looking at the top, what is the angle of the plane on the xy plane """
         dot_product = np.dot(self.u_direction(),np.array([1, 0, 0]))
         xy_angle = np.degrees(np.arccos(dot_product))
-        return (xy_angle)
+        return xy_angle
     
     def tilt_deg(self):
         """ What is the tilt of the plane compared to z axis """
         dot_product = np.dot(self.v_direction(),np.array([0, 0, 1]))
         z_angle = np.degrees(np.arccos(dot_product))
-        return (z_angle)    
+        return z_angle    

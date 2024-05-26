@@ -62,6 +62,10 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(self.fp.xy_rotation_deg(),45, places=0)
         self.assertAlmostEqual(self.fp.tilt_deg(),0, places=0)
         
+        # We have no number for direction from origin, but we want to see the code runs
+        d = self.fp.distance_from_origin_mm()
+        
+        
     def test_plane_normal_computed_correctly(self):
         f = FitPlane([1,0,0],[0,0,1],[10,0,0],method='u,v,h directly')
         n = f.normal_direction()
