@@ -258,3 +258,15 @@ class FitPlane:
         pt2 = self.get_xyz_from_uv([pt2_u, pt12_v])
         
         return (pt1[:2],pt2[:2])
+        
+    def xy_rotation_deg(self):
+        """ When looking at the top, what is the angle of the plane on the xy plane """
+        dot_product = np.dot(self.u_direction(),np.array([1, 0, 0]))
+        xy_angle = np.degrees(np.arccos(dot_product))
+        return (xy_angle)
+    
+    def tilt_deg(self):
+        """ What is the tilt of the plane compared to z axis """
+        dot_product = np.dot(self.v_direction(),np.array([0, 0, 1]))
+        z_angle = np.degrees(np.arccos(dot_product))
+        return (z_angle)    

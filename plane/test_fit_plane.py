@@ -58,6 +58,10 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(xy_angle,45, places=0)
         self.assertAlmostEqual(z_angle ,90, places=1)
         
+    def test_plane_angle_statistics(self):
+        self.assertAlmostEqual(self.fp.xy_rotation_deg(),45, places=0)
+        self.assertAlmostEqual(self.fp.tilt_deg(),0, places=0)
+        
     def test_plane_normal_computed_correctly(self):
         f = FitPlane([1,0,0],[0,0,1],[10,0,0],method='u,v,h directly')
         n = f.normal_direction()
