@@ -23,24 +23,26 @@ class TestFitPlane(unittest.TestCase):
                 [ [1625, 0], [1625, 1] ],
                 [ [1894, 0], [1894, 1] ], # A few points on line 6 (h)
                 ]
+        
+        self.fit_default_plane()
                 
-    def test_main_function_runs(self):
+    def fit_default_plane(self):
         self.fp = FitPlane(
             self.default_fluorescence_image_points_on_line_pix, 
             self.default_photobleach_line_position_mm, 
             self.default_photobleach_line_group,
             )
+                
+    def test_main_function_runs(self):
+        self.fit_default_plane()
     
     def test_example_pixel_size_u(self):
-        self.test_main_function_runs()
         self.assertAlmostEqual(self.fp.u_norm_mm()*1000, 1, places=0)
    
     def test_example_pixel_size_v(self):
-        self.test_main_function_runs()
         self.assertAlmostEqual(self.fp.v_norm_mm()*1000, 1, places=0)
         
     def test_example_u_vector_direction(self):
-        self.test_main_function_runs()
         u_direction = self.fp.u_direction()
         xy_angle = np.degrees(np.arccos(np.dot(u_direction,np.array([1, 0, 0]))))
         z_angle = np.degrees(np.arccos(np.dot(u_direction,np.array([0, 0, 1]))))
@@ -66,7 +68,6 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(d, -50, places=1)
     
     def test_example_v_vector_direction(self):
-        self.test_main_function_runs()
         v_direction = self.fp.v_direction()
         z_angle = np.degrees(np.arccos(np.dot(v_direction,np.array([0, 0, 1]))))
         
@@ -105,16 +106,12 @@ class TestFitPlane(unittest.TestCase):
                 method='points on photobleach lines')
     
     def test_conversion_pixel_position_to_physical_h(self):
-        self.test_main_function_runs()
-        
         pos_xyz = self.fp.get_xyz_from_uv([0,0])
         self.assertAlmostEqual(pos_xyz[0], self.fp.h[0], places=1)
         self.assertAlmostEqual(pos_xyz[1], self.fp.h[1], places=1)
         self.assertAlmostEqual(pos_xyz[2], self.fp.h[2], places=1)
     
     def test_conversion_pixel_position_to_physical_u(self):
-        self.test_main_function_runs()
-        
         pos_xyz_1 = self.fp.get_xyz_from_uv([0,0])
         pos_xyz_2 = self.fp.get_xyz_from_uv([1,0])
         self.assertAlmostEqual(pos_xyz_2[0] - pos_xyz_1[0], self.fp.u[0], places=1)
@@ -122,8 +119,6 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(pos_xyz_2[2] - pos_xyz_1[2], self.fp.u[2], places=1)
         
     def test_conversion_pixel_position_to_physical_v(self):
-        self.test_main_function_runs()
-        
         pos_xyz_1 = self.fp.get_xyz_from_uv([0,0])
         pos_xyz_2 = self.fp.get_xyz_from_uv([0,1])
         self.assertAlmostEqual(pos_xyz_2[0] - pos_xyz_1[0], self.fp.v[0], places=1)
@@ -131,8 +126,6 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(pos_xyz_2[2] - pos_xyz_1[2], self.fp.v[2], places=1)
     
     def test_conversion_pixel_position_to_physical_and_back(self):
-        self.test_main_function_runs()
-        
         u = 12
         v = 20
         pos_xyz = self.fp.get_xyz_from_uv([u,v])
@@ -142,8 +135,6 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(pos_uv[1], v, places=1)
         
     def test_conversion_physical_to_pixel_when_point_is_off_plane(self):
-        self.test_main_function_runs()
-        
         u = 12
         v = 20
         pos_xyz = self.fp.get_xyz_from_uv([u,v])
