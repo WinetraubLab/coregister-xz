@@ -19,14 +19,22 @@ class FitPlane:
             fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group)
     
     def _fit_from_photobleach_lines(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
-        ):
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
+        override_value_cheks=False):
         
         # Solve x,y first
         self._fit_from_photobleach_lines_xy(
             fluorescence_image_points_on_line_pix, 
             photobleach_line_position_mm, 
             photobleach_line_group)
+            
+        # Check that u vec is more or less in the x-y plane
+        min_ratio = 0.1 # corresponding <6 degrees
+        if (not (np.linalg.norm(self.v[:2]) < np.linalg.norm(self.u[:2])*min_ratio) and 
+            not (override_value_cheks)):
+            raise ValueError(
+                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
+                % min_ratio)
             
         # Make sure u has no z component. It will help make things standard
         self._fit_from_photobleach_lines_z_from_no_shear_equal_size()

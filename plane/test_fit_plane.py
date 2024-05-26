@@ -57,8 +57,25 @@ class TestFitPlane(unittest.TestCase):
     def test_tilted_image(self):
         # For this test, we will look at the case where fluorescence image is tilted.
         # Our code should return an error
-        x=1 # TBD
         
+        # Define the rotation matrix for 10 degrees
+        theta = np.radians(10)
+        cos_theta = np.cos(theta)
+        sin_theta = np.sin(theta)
+        rotation_matrix = np.array([
+            [cos_theta, -sin_theta],
+            [sin_theta, cos_theta]
+        ])
+        
+        # Apply the rotation matrix to each point
+        rotated_fluorescence_image_points_on_line_pix = self.default_fluorescence_image_points_on_line_pix @ rotation_matrix.T
+        
+        # Fit a plane
+        with self.assertRaises(ValueError) as context:
+            fp = FitPlane(
+                rotated_fluorescence_image_points_on_line_pix, 
+                self.default_photobleach_line_position_mm, 
+                self.default_photobleach_line_group)
 
 if __name__ == '__main__':
     unittest.main()
