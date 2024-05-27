@@ -30,7 +30,7 @@ class TestFitPlane(unittest.TestCase):
         self.fit_default_plane()
                 
     def fit_default_plane(self):
-        self.fp = FitPlane(
+        self.fp = FitPlane.from_fitting_points_on_photobleach_lines(
             self.default_fluorescence_image_points_on_line_pix, 
             self.default_photobleach_line_position_mm, 
             self.default_photobleach_line_group,
@@ -65,9 +65,8 @@ class TestFitPlane(unittest.TestCase):
         # We have no number for direction from origin, but we want to see the code runs
         d = self.fp.distance_from_origin_mm()
         
-        
     def test_plane_normal_computed_correctly(self):
-        f = FitPlane([1,0,0],[0,0,1],[10,0,0],method='u,v,h directly')
+        f = FitPlane([1,0,0],[0,0,1],[10,0,0])
         n = f.normal_direction()
         
         error_angle = np.degrees(np.arccos(np.dot(n,np.array([0, -1, 0]))))
@@ -75,7 +74,7 @@ class TestFitPlane(unittest.TestCase):
 
     def test_plane_equation(self):
         # Test with plane z=50
-        f = FitPlane([1,0,0],[0,1,0],[10,0,50],method='u,v,h directly')
+        f = FitPlane([1,0,0],[0,1,0],[10,0,50])
         a,b,c,d = f.plane_equation()
         
         self.assertAlmostEqual(a, 0, places=1)
@@ -91,31 +90,31 @@ class TestFitPlane(unittest.TestCase):
 
     def test_u_v_orthogonal_check(self):
         with self.assertRaises(ValueError) as context:
-            f = FitPlane([1,0,0],[1,0,0],[10,0,0],method='u,v,h directly')
+            f = FitPlane([1,0,0],[1,0,0],[10,0,0])
     
     def test_u_v_nrom_check(self):
         with self.assertRaises(ValueError) as context:
-            f = FitPlane([1,0,0],[0,0,2],[10,0,0],method='u,v,h directly')
+            f = FitPlane([1,0,0],[0,0,2],[10,0,0])
             
     def test_different_number_of_inputs_elements(self):
         with self.assertRaises(ValueError) as context:
-            fp = FitPlane(
+            fp = FitPlane.from_fitting_points_on_photobleach_lines(
                 self.default_fluorescence_image_points_on_line_pix[1:], 
                 self.default_photobleach_line_position_mm, 
                 self.default_photobleach_line_group,
-                method='points on photobleach lines')
+                )
         with self.assertRaises(ValueError) as context:
-            fp = FitPlane(
+            fp = FitPlane.from_fitting_points_on_photobleach_lines(
                 self.default_fluorescence_image_points_on_line_pix, 
                 self.default_photobleach_line_position_mm[1:], 
                 self.default_photobleach_line_group,
-                method='points on photobleach lines')
+                )
         with self.assertRaises(ValueError) as context:
-            fp = FitPlane(
+            fp = FitPlane.from_fitting_points_on_photobleach_lines(
                 self.default_fluorescence_image_points_on_line_pix, 
                 self.default_photobleach_line_position_mm, 
                 self.default_photobleach_line_group[1:],
-                method='points on photobleach lines')
+                )
     
     def test_tilted_image(self):
         # For this test, we will look at the case where fluorescence image is tilted.
@@ -135,11 +134,11 @@ class TestFitPlane(unittest.TestCase):
         
         # Fit a plane
         with self.assertRaises(ValueError) as context:
-            fp = FitPlane(
+            fp = FitPlane.from_fitting_points_on_photobleach_lines(
                 rotated_fluorescence_image_points_on_line_pix, 
                 self.default_photobleach_line_position_mm, 
                 self.default_photobleach_line_group,
-                method='points on photobleach lines')
+                )
     
     def test_conversion_pixel_position_to_physical_h(self):
         pos_xyz = self.fp.get_xyz_from_uv([0,0])
@@ -193,7 +192,7 @@ class TestFitPlane(unittest.TestCase):
         self.assertAlmostEqual(pos_uv[0], u, places=1)
         self.assertAlmostEqual(pos_uv[1], v, places=1)
         
-    def test_recomended_center_pix(self):
+    def test_recommended_center_pix(self):
         # Modify the pen & paper solution such that lines are centered around origin.
         # In this case, recommended center should be just above origin (0,0,0)
         self.default_photobleach_line_position_mm = [ -0.1, 0, 0.1, 0.2, 0.1, 0, -0.2]
@@ -202,8 +201,8 @@ class TestFitPlane(unittest.TestCase):
         u_coordinates = np.array([item[0] for sublist in self.default_fluorescence_image_points_on_line_pix for item in sublist])
         v_coordinates = np.array([item[1] for sublist in self.default_fluorescence_image_points_on_line_pix for item in sublist])
         
-        self.assertAlmostEqualRelative(self.fp.recomended_center_pix[0], np.mean(u_coordinates) , rel_tol=0.1) # Accurate up to 10%
-        self.assertAlmostEqualRelative(self.fp.recomended_center_pix[1], np.mean(v_coordinates) , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(self.fp.recommended_center_pix[0], np.mean(u_coordinates) , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(self.fp.recommended_center_pix[1], np.mean(v_coordinates) , rel_tol=0.1) # Accurate up to 10%
 
     def verify_two_2D_vectors_point_in_same_direction(self,v1,v2):
         
@@ -252,6 +251,12 @@ class TestFitPlane(unittest.TestCase):
         
         # Verify that pt1-->pt2 is at the same direction as u vector
         self.verify_two_2D_vectors_point_in_same_direction(pt2-pt1, self.fp.u)
+        
+    def test_serialization_deserialization(self):
+        json_str1 = self.fp.to_json()
+        json_str2 = FitPlane.from_json(json_str1).to_json()
+        
+        self.assertEqual(json_str1, json_str2)
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
         plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])

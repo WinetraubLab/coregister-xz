@@ -1,66 +1,82 @@
+import json
 import numpy as np
 
 class FitPlane:
     
-    def __init__(self, *args, method="points on photobleach lines") :
+    """ Begin constractor methods """
+    def __init__(self,u=None,v=None,h=None,recommended_center_pix=[0,0]):
+        self.u = np.array(u)
+        self.v = np.array(v)
+        self.h = np.array(h)
+        self.recommended_center_pix = np.array(recommended_center_pix)
+        
+        if u is not None and v is not None and h is not None:
+            self._check_u_v_consistency_assumptions()
+    
+    @classmethod
+    def from_fitting_points_on_photobleach_lines(cls, 
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group):
         """
-        Constructor for the FitPlane class based on method
-
-        If method="points on photobleach lines", Inputs:
+        This function initialize FitPlane by points on photobleach lines.
+        
+        INPUTS:
             fluorescence_image_points_on_line_pix: For each of the photobleach lines, 
                 find at least two points in the fluorescence image. Mark the coordinates as pixel values
                 l1 = [[x1,y1],[x2,y2],...] and create an array of those [l1,l2,...,ln]
             photobleach_line_position_mm: an array defining the position (in mm) of each of the photobleach line positions 
             photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...] etc
-        If method="u,v,h directly", Inputs:
-            u,v,h in mm
         """
-        if method == "points on photobleach lines":
-            self._fit_from_points_on_photobleach_lines(args[0],args[1],args[2])
-        elif method == "u,v,h directly":
-            self.u = np.array(args[0])
-            self.v = np.array(args[1])
-            self.h = np.array(args[2])
-            self.recomended_center_pix = np.array([0,0])
-        else:
-            raise ValueError("Invalid initialization method: %s" % method)
-            
-        self._check_u_v_consistency_assumptions()
-    
-    def _fit_from_points_on_photobleach_lines(self, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group):
-        """ This function initialize FitPlane by points on photobleach lines.
-        It sets self values of u,v,h and recomended_center_pix point in the fluorescence image c=(cu,cv)"""
         
+        fp = cls()
+        
+        # Input check
         if (len(fluorescence_image_points_on_line_pix) != len(photobleach_line_position_mm) or
             len(fluorescence_image_points_on_line_pix) != len(photobleach_line_group)):
             raise ValueError("Number of lines should be the same between " + 
                 "fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group")
         
         # Solve x,y first
-        self._fit_from_photobleach_lines_xy(
+        c = fp._fit_from_photobleach_lines_xy(
             fluorescence_image_points_on_line_pix, 
             photobleach_line_position_mm, 
             photobleach_line_group)
             
         # Make sure u has no z component. It will help make things standard
-        self._fit_from_photobleach_lines_z_from_no_shear_equal_size()
+        fp._fit_from_photobleach_lines_z_from_no_shear_equal_size()
         
         # Fix z component
-        self.h[2] = 0
+        fp.h[2] = 0
         
         # Check
-        self._check_u_v_consistency_assumptions()
+        fp._check_u_v_consistency_assumptions()
         
         # Find recomended_center according to this logic:
         # c_u - according to the location that norm hits the plane
         # c_v - center of the fluorescence_image_points_on_line_pix
         v_coordinates = np.array([item[1] for sublist in fluorescence_image_points_on_line_pix for item in sublist])
         c_v = np.mean(v_coordinates)
-        o = self.get_uv_from_xyz([0,0,0])
+        o = fp.get_uv_from_xyz([0,0,0])
         c_u = o[0]
-        self.recomended_center_pix = np.array([c_u, c_v])
+        fp.recommended_center_pix = np.array([c_u, c_v])
         
+        return(fp)
+        
+    @classmethod
+    def from_json(cls, json_str):
+        """
+        Deserialize a JSON string to a FitPlane object.
+        """
+        # Parse the JSON string
+        data = json.loads(json_str)
+        # Create a new FitPlane object using the parsed data
+        return cls(
+            u=data['u'],
+            v=data['v'],
+            h=data['h'],
+            recommended_center_pix=data['recommended_center_pix']
+        )
+    
+    """ End constractor methods """    
     def _fit_from_photobleach_lines_xy(self, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group
         ):
@@ -246,12 +262,12 @@ class FitPlane:
 
         if no_x_limit and no_y_limit:
             # No limits found, use default values 
-            pt1_u, pt2_u = min(0, self.recomended_center_pix[0]), max(0, self.recomended_center_pix[0])
+            pt1_u, pt2_u = min(0, self.recommended_center_pix[0]), max(0, self.recommended_center_pix[0])
         else:        
             # Aggregate all points to find the maximum bounds
             pt1_u = min(pt1_u_x,pt1_u_y)
             pt2_u = max(pt2_u_x,pt2_u_y)
-        pt12_v = self.recomended_center_pix[1]
+        pt12_v = self.recommended_center_pix[1]
         
         # Figure out u,v on the plane that the points correspond to
         pt1 = self.get_xyz_from_uv([pt1_u, pt12_v])
@@ -273,4 +289,23 @@ class FitPlane:
         """ What is the tilt of the plane compared to z axis """
         dot_product = np.dot(self.v_direction(),np.array([0, 0, 1]))
         z_angle = np.degrees(np.arccos(dot_product))
-        return z_angle    
+        return z_angle  
+        
+    def _from_json(self, json_str):
+        data = json.loads(json_str)
+        self.u=data['u'],
+        self.v=data['v'],
+        self.h=data['h'],
+        self.recommended_center_pix=data['recommended_center_pix']
+        
+    def to_json(self):
+        """
+        Serialize the object to a JSON string.
+        """
+        # Convert the object's dictionary to JSON
+        return json.dumps({
+            'u': self.u.tolist(),
+            'v': self.v.tolist(),
+            'h': self.h.tolist(),
+            'recommended_center_pix': self.recommended_center_pix.tolist()
+            })
