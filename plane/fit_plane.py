@@ -153,11 +153,12 @@ class FitPlane:
             raise ValueError('u must be orthogonal to v')
         
         # Check that u vec is more or less in the x-y plane
-        min_ratio = 0.1 # corresponding <6 degrees
-        if not ( abs(self.u[2]) < np.linalg.norm(self.u[:2])*min_ratio):
+        min_ratio = 0.15
+        slope = abs(self.u[2]) / np.linalg.norm(self.u[:2])
+        if not ( slope < min_ratio):
             raise ValueError(
-                'Make sure that tissue surface is parallel to x axis (<%.2f slope), angle is too steep right now'
-                % min_ratio)
+                'Make sure that tissue surface is parallel to x axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope'
+                % (slope, np.degrees(np.arcsin(slope)),min_ratio))
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """

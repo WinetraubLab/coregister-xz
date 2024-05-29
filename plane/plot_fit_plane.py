@@ -7,7 +7,7 @@ def plot_fit_plane(
     vLines_mm, # Position of vertical lines
     hLines_mm, # Position of horizontal lines
     oct_scan_size_mm=0.5, # Size of the OCT scan around the center
-    plot_bound_mm=3, # How big to plot
+    plot_bound_mm=2.5, # How big to plot
     reverse_plot=False, # Set to true if the flourecence image is reversed
     ):
     """ Plot the fit plane from above (xy projection) """
@@ -42,9 +42,9 @@ def plot_fit_plane(
     plt.xlabel('X[mm]')
     plt.ylabel('Y[mm]')
     plt.grid(True)
-    plt.xlim(-plot_bound_mm, plot_bound_mm)
-    plt.ylim(-plot_bound_mm, plot_bound_mm)
     plt.axis('equal')
+    plt.xlim(-plot_bound_mm, plot_bound_mm)
+    #plt.ylim(-plot_bound_mm, plot_bound_mm)
     if reverse_plot:
         plt.gca().invert_yaxis()
         plt.gca().invert_xaxis()
