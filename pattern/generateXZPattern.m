@@ -9,12 +9,12 @@ function [...
 % line information as well as image 
 
 %% Define the pattern 
-base = 90e-3; %base seperation [mm]
-lineLength = 6; %[mm]
 vLineBias = 500e-3; % [mm]
 hLineBias = -650e-3; % [mm]
+base = 90e-3; %base seperation [mm]
 vLinePositions = [-1 0 1]; % Unitless, vLine positions as multiplication of base
 hLinePositions = [-3 0 1 3]; % Unitless, hLine positions as multiplication of base
+lineLength = 6; %[mm]
 
 z_mm = 30e-3; % [mm], how deep to draw pattern compared to the surface.
 
