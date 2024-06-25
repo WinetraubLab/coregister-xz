@@ -10,7 +10,7 @@
 % Define the bounding box to generate 3D simulation for
 x_grid_mm = -1.00:2e-3:1.00;
 y_grid_mm = -1.00:2e-3:1.00;
-z_grid_mm =  0.00:2e-3:0.20;
+z_grid_mm =  0.00:2e-3:0.10;
 
 % Physical parameters 
 NA = 0.35; % Match NA to observed photobleach pattern. For 40x use 0.35 (though lens NA is 0.8)

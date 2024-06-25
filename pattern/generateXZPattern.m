@@ -32,4 +32,17 @@ x_end_mm   = [x_end_mm   +lineLength/2*ones(size(hLinePositions))];
 y_start_mm = [y_start_mm  hLinePositions*base+hLineBias];
 y_end_mm   = [y_end_mm    hLinePositions*base+hLineBias];
 
+%% Add dots
+number_of_dots = 10;
+rng(13); % Seed
+rand_numbers_m1to1 = (2*rand(2, number_of_dots)-1); % Random numbers between -1 and 1
+rand_numbers_m1to1 = round(rand_numbers_m1to1*4)/4; % Only specific cells are allowed
+dot_xy_mm = rand_numbers_m1to1*0.1;
+
+x_start_mm = [x_start_mm (dot_xy_mm(1,:)-1e-3)];
+x_end_mm = [x_end_mm (dot_xy_mm(1,:)+1e-3)];
+y_start_mm = [y_start_mm dot_xy_mm(2,:)];
+y_end_mm = [y_end_mm dot_xy_mm(2,:)];
+
+%% Finish with z
 z_mm = z_mm * ones(size(x_start_mm));
