@@ -229,8 +229,8 @@ class FitPlane:
         no_x_limit = min_x_mm is None or max_x_mm is None
         if no_x_limit:
             # No clear user limits
-            pt1_u_x = np.Inf
-            pt2_u_x = -np.Inf
+            pt1_u_x = np.inf
+            pt2_u_x = -np.inf
         else:
             # We need to find where min_x_mm, max_x_mm are on the plane.
             # To do so, we get the equation ax+by+cz+d=0, and set x to the limits, and z to 0 to find y.
@@ -247,8 +247,8 @@ class FitPlane:
         no_y_limit = min_y_mm is None or max_y_mm is None
         if no_y_limit:
             # No clear user limits
-            pt1_u_y = np.Inf
-            pt2_u_y = -np.Inf
+            pt1_u_y = np.inf
+            pt2_u_y = -np.inf
         else:
             # We need to find where min_y_mm, max_y_mm are on the plane.
             # To do so, we get the equation ax+by+cz+d=0, and set y to the limits, and z to 0 to find x.
