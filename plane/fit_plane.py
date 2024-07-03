@@ -15,7 +15,8 @@ class FitPlane:
     
     @classmethod
     def from_fitting_points_on_photobleach_lines(cls, 
-        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group):
+        fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
+        print_inputs = False):
         """
         This function initialize FitPlane by points on photobleach lines.
         
@@ -25,9 +26,17 @@ class FitPlane:
                 l1 = [[x1,y1],[x2,y2],...] and create an array of those [l1,l2,...,ln]
             photobleach_line_position_mm: an array defining the position (in mm) of each of the photobleach line positions 
             photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...] etc
+            print_inputs: prints to screen the inputs of the function for debug purposes.
         """
-        
         fp = cls()
+
+        # Print inputs
+        if print_inputs:
+            txt = 'FitPlane.from_fitting_points_on_photobleach_lines('
+            txt = txt + json.dumps(np.array(fluorescence_image_points_on_line_pix).tolist()) + ','
+            txt = txt + json.dumps(np.array(photobleach_line_position_mm).tolist()) + ','
+            txt = txt + json.dumps(np.array(photobleach_line_group).tolist()) + ')'
+            print(txt)
         
         # Input check
         if (len(fluorescence_image_points_on_line_pix) != len(photobleach_line_position_mm) or

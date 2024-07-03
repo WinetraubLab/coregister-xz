@@ -42,7 +42,34 @@ class TestFitPlane(unittest.TestCase):
             self.fail(self._formatMessage(msg, standard_msg))
                 
     def test_main_function_runs(self):
-        self.fit_default_plane()
+        # Define the pattern from above
+        self.default_photobleach_line_position_mm = [ 0.6, 0.7, 0.8, -0.2, -0.3, -0.4, -0.6] # Offset of each line from the center
+        self.default_photobleach_line_group = ['v', 'v', 'v', 'h', 'h', 'h', 'h'] # v means the line is vertical line, h means horizontal line, 's' is surface line
+        
+        # Identify positions on the fluorescence image that are on each lines
+        self.default_fluorescence_image_points_on_line_pix = [
+                [ [ 143, 0], [ 143, 1] ], # A few points on line 0 (v)
+                [ [ 272, 0], [ 272, 1] ], # A few points on line 1 (v)
+                [ [ 412, 0], [ 412, 1] ], # ...
+                [ [1359, 0], [1359, 1] ],
+                [ [1492, 0], [1492, 1] ],
+                [ [1625, 0], [1625, 1] ],
+                [ [1894, 0], [1894, 1] ], # A few points on line 6 (h)
+                ]
+        
+        fp = FitPlane.from_fitting_points_on_photobleach_lines(
+            self.default_fluorescence_image_points_on_line_pix, 
+            self.default_photobleach_line_position_mm, 
+            self.default_photobleach_line_group,
+            )
+
+    def test_main_function_runs_with_debug_inputs(self):
+        fp = FitPlane.from_fitting_points_on_photobleach_lines(
+            self.default_fluorescence_image_points_on_line_pix, 
+            self.default_photobleach_line_position_mm, 
+            self.default_photobleach_line_group,
+            print_inputs = True
+            )
     
     def test_example_pixel_size_u(self):
         self.assertAlmostEqual(self.fp.u_norm_mm()*1000, 1, places=0)
