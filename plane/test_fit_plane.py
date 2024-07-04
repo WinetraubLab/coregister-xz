@@ -287,6 +287,10 @@ class TestFitPlane(unittest.TestCase):
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
         plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
+
+    def test_edge_cases_that_used_to_fail(self):
+        # This use to give error: u,v are not the same norm
+        FitPlane.from_fitting_points_on_photobleach_lines([[[1407, 282], [1407, 363]], [[1623, 282], [1623, 363]], [[1844, 282], [1844, 359]], [[4484, 282], [4484, 359]], [[4736, 282], [4736, 359]], [[4885, 282], [4889, 359]], [[5267, 278], [5294, 359]]],[-0.92, -0.65, -0.56, -0.38, 0.41000000000000003, 0.5, 0.59],["h", "h", "h", "h", "v", "v", "v"])
         
 if __name__ == '__main__':
     unittest.main()
