@@ -9,23 +9,30 @@ def plot_fit_plane(
     oct_scan_size_mm=0.5, # Size of the OCT scan around the center
     plot_bound_mm=2.5, # How big to plot
     reverse_plot=False, # Set to true if the flourecence image is reversed
+    ax=None, # Set to axs if plotting in a subplot is needed, use None otherwise
     ):
     """ Plot the fit plane from above (xy projection) """
     
     # Input check
     if not isinstance(fp, list):
         fp = [fp]
+
+    if ax is None:
+        _, ax = plt.subplots()
+        show_at_end = True
+    else:
+        show_at_end = False
     
     # Plot photobleach lines pattern
     for vline in vLines_mm:
-        plt.axvline(x=vline, color='r', linestyle='-')
+        ax.axvline(x=vline, color='r', linestyle='-')
     for hline in hLines_mm:
-        plt.axhline(y=hline, color='b', linestyle='-')
+        ax.axhline(y=hline, color='b', linestyle='-')
     
     # Plot OCT Scan
     square_x = [-oct_scan_size_mm/2, oct_scan_size_mm/2, oct_scan_size_mm/2, -oct_scan_size_mm/2, -oct_scan_size_mm/2]
     square_y = [-oct_scan_size_mm/2, -oct_scan_size_mm/2, oct_scan_size_mm/2, oct_scan_size_mm/2, -oct_scan_size_mm/2]
-    plt.plot(square_x, square_y, color='k', linestyle=':')
+    ax.plot(square_x, square_y, color='k', linestyle=':')
     
     # Draw the planes
     for fp_instance in fp:
@@ -36,17 +43,17 @@ def plot_fit_plane(
             max_y_mm = max(hLines_mm)+0.1,
             )
         d = pt2-pt1
-        plt.arrow(pt1[0], pt1[1], d[0], d[1], color='k', head_width=0.1, head_length=0.1)
+        ax.arrow(pt1[0], pt1[1], d[0], d[1], color='k', head_width=0.1, head_length=0.1)
     
     # Set titles, axis etc
-    plt.xlabel('X[mm]')
-    plt.ylabel('Y[mm]')
-    plt.grid(True)
-    plt.axis('equal')
-    plt.xlim(-plot_bound_mm, plot_bound_mm)
-    #plt.ylim(-plot_bound_mm, plot_bound_mm)
+    ax.set_xlabel('X[mm]')
+    ax.set_ylabel('Y[mm]')
+    ax.grid(True)
+    ax.axis('square')
+    ax.set_xlim(-plot_bound_mm, plot_bound_mm)
     if reverse_plot:
-        plt.gca().invert_yaxis()
-        plt.gca().invert_xaxis()
+        ax.gca().invert_yaxis()
+        ax.gca().invert_xaxis()
 
-    plt.show()
+    if show_at_end:
+        plt.show()

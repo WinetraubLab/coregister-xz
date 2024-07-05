@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import numpy.testing as npt
+import matplotlib.pyplot as plt
 import unittest
 from plane.fit_plane import FitPlane
 from plane.plot_fit_plane import plot_fit_plane
@@ -287,6 +288,29 @@ class TestFitPlane(unittest.TestCase):
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
         plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
+
+    def test_all_plots_are_legible(slef):
+        # Define planes
+        v_photobleach_line_position_mm = np.array([0.41, 0.5 , 0.59])
+        h_photobleach_line_position_mm = np.array([-0.92, -0.65, -0.56, -0.38])
+        pos = np.max([np.max(np.abs(v_photobleach_line_position_mm)), np.max(np.abs(h_photobleach_line_position_mm))])
+        fp1 = FitPlane(u=[1,-1,0],v=[0,0,1.41],h=[+1*pos, 0, 0])
+        fp2 = FitPlane(u=[1,+1,0],v=[0,0,1.41],h=[-1*pos, 0, 0])
+        fp3 = FitPlane(u=[1,-1,0],v=[0,0,1.41],h=[-2*pos, 0, 0])
+        fp4 = FitPlane(u=[1,+1,0],v=[0,0,1.41],h=[+2*pos, 0, 0])
+        
+        # Plot them
+        fig, axs = plt.subplots(2,2)
+        plot_fit_plane(fp1, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0,1])
+        plot_fit_plane(fp2, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0,0])
+        plot_fit_plane(fp3, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1,0])
+        plot_fit_plane(fp4, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1,1])
+        axs[0,1].set_title('Cut Position 1\nMake Sure Arrow is Showing')
+        axs[0,0].set_title('Cut Position 2\nMake Sure Arrow is Showing')
+        axs[1,0].set_title('Cut Position 3')
+        axs[1,1].set_title('Cut Position 4')
+        plt.show()
+        
 
     def test_edge_cases_that_used_to_fail(self):
         # This use to give error: u,v are not the same norm
