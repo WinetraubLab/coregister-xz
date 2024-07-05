@@ -300,15 +300,17 @@ class TestFitPlane(unittest.TestCase):
         fp4 = FitPlane(u=[1,+1,0],v=[0,0,1.41],h=[+2*pos, 0, 0])
         
         # Plot them
-        fig, axs = plt.subplots(2,2)
-        plot_fit_plane(fp1, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0,1])
-        plot_fit_plane(fp2, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0,0])
-        plot_fit_plane(fp3, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1,0])
-        plot_fit_plane(fp4, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1,1])
-        axs[0,1].set_title('Cut Position 1\nMake Sure Arrow is Showing')
-        axs[0,0].set_title('Cut Position 2\nMake Sure Arrow is Showing')
-        axs[1,0].set_title('Cut Position 3')
-        axs[1,1].set_title('Cut Position 4')
+        fig, axs = plt.subplots(1,4, figsize=(9, 3))
+        plot_fit_plane(fp1, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0])
+        plot_fit_plane(fp2, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1])
+        plot_fit_plane(fp3, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[2])
+        plot_fit_plane(fp4, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[3])
+        axs[0].set_title('Cut Position 1')
+        axs[1].set_title('Cut Position 2')
+        axs[2].set_title('Cut Position 3')
+        axs[3].set_title('Cut Position 4')
+        for ax in axs[1:4]:
+            ax.set_ylabel('')
         plt.show()
         
 
