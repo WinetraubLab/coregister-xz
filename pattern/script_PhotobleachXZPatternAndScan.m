@@ -37,7 +37,6 @@ yOCTPhotobleachTile(...
     'enableZoneAccuracy',1e-3,'enableZoneAccuracy',1e-3,... These arguments are needed for photobleaching the dots, comment out if no dotes are photobleached
     'plotPattern',true, ...
     'v',true); 
-axis xy
 disp('Done Patterning')
 
 %% OCT Volume Scan
