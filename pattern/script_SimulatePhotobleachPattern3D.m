@@ -34,10 +34,12 @@ zR_mm = pi*w0_mm^2/lambda_mm;
 %% Create a gread
 [xx_mm, yy_mm] = meshgrid(x_grid_mm,y_grid_mm);
 pixel_size_mm = diff(x_grid_mm(1:2));
+output_data = zeros(length(z_grid_mm),length(x_grid_mm),length(y_grid_mm),'uint8');
 
 % Loop for each plane in z
 isFirstLoop=true;
-for z=z_grid_mm
+for zi=1:length(z_grid_mm)
+    z=z_grid_mm(zi);
     c_all = ones(size(xx_mm));
 
     % Loop over all lines
@@ -71,15 +73,7 @@ for z=z_grid_mm
         c_all = addOCTScanRectangle(c_all, xx_mm, yy_mm, oct_scan_mm,pixel_size_mm);
     end
 
-    % Save to disk
-    if isFirstLoop
-        imwrite(c_all,output_tiff_file,...
-            'Description',' ' ... Description contains min & max values
-            );
-        isFirstLoop = false;
-    else
-        imwrite(c_all,output_tiff_file,'writeMode','append');     
-    end
+    output_data(zi,:,:) = c_all;
     
     % Present to user
     figure(27);
@@ -89,6 +83,9 @@ for z=z_grid_mm
     colormap gray
     pause(0.1);
 end
+
+%% Save
+yOCT2Tif(output_data,output_tiff_file);
 
 %% Finally, print to screen a description of how this pattern was created
 describePattern(x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm)
