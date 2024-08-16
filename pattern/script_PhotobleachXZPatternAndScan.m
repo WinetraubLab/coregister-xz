@@ -40,4 +40,5 @@ yOCTPhotobleachTile(...
 disp('Done Patterning')
 
 %% OCT Volume Scan
-error('OCT Volume Scan Not Yet Defined')
+disp('To scan use Demo_ScanAndProcess_3D, running it now')
+Demo_ScanAndProcess_3D
