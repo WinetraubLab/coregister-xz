@@ -51,6 +51,7 @@ def plot_fit_plane(
     ax.grid(True)
     ax.axis('square')
     ax.set_xlim(-plot_bound_mm, plot_bound_mm)
+    ax.gca().invert_yaxis() # Plot using ij notation instead of xy
     if reverse_plot:
         ax.gca().invert_yaxis()
         ax.gca().invert_xaxis()
