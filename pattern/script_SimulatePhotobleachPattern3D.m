@@ -19,7 +19,7 @@ n = 1.4; % Medium index of refraction
 photobleach_intensity = 40; % Can be any number >0
 
 % Plot OCT volume on top?
-oct_scan_mm = [-0.1 0.1]; % OCT x-y scan size
+oct_scan_mm = [-0.25 0.25]; % OCT x-y scan size
 % If you don't want to plot oct_scan_mm, un-comment:
 % oct_scan_mm = nan;
 
