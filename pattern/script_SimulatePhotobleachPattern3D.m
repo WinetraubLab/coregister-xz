@@ -36,9 +36,10 @@ zR_mm = pi*w0_mm^2/lambda_mm;
 pixel_size_mm = diff(x_grid_mm(1:2));
 output_data = zeros(length(z_grid_mm),length(x_grid_mm),length(y_grid_mm),'uint8');
 
-% Loop for each plane in z
+% Loop for each plane in z, start at the bottom to match coordinate system
+% orientation: https://docs.google.com/presentation/d/1tOod76WvhvOuByo-K81YB4b3QjRq-6A5j2ztS_ANSNo/edit#slide=id.g2812f1bd1d1_0_52
 isFirstLoop=true;
-for zi=1:length(z_grid_mm)
+for zi=length(z_grid_mm):-1:1
     z=z_grid_mm(zi);
     c_all = ones(size(xx_mm));
 
