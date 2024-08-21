@@ -338,5 +338,25 @@ class TestFitPlane(unittest.TestCase):
         check_point(15)
         check_point(-18)
 
+    def test_h_line_plane_intercept(self):
+        # Check that the equation for h intercept does produce points on the intercept
+        y_ref = 10
+        a, b, c = self.fp.h_line_plane_intercept(y_ref)
+        def my_pt(t):
+            if abs(a)<0.1:
+                u = t
+                v = -(a*u+c)/b
+            else:
+                v = t
+                u = -(b*v+c)/a     
+            return u,v
+        def check_point(t):
+            u,v = my_pt(t) 	
+            pt = self.fp.get_xyz_from_uv([u,v])
+            self.assertAlmostEqual(pt[1],y_ref,places=2)
+        check_point(0)
+        check_point(15)
+        check_point(-18)
+
 if __name__ == '__main__':
     unittest.main()
