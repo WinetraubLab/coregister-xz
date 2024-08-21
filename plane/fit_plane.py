@@ -220,8 +220,10 @@ class FitPlane:
         return (self.u*u_pix + self.v*v_pix + self.h)
     
     def get_uv_from_xyz(self, point_mm):
-        """ Get the u,v coordinates on an image from a point in space, if point is outside the plane, return the u,v of the closest point """
-        
+        """ Get the u,v coordinates on an image from a point in space, if point is outside the plane, return the u,v of the closest point. point_mm is a 3D numpy array or array """
+	
+        point_mm = np.array(point_mm)        
+
         # Assuming u is orthogonal to v (as it shuld) for this function to work
         self._check_u_v_consistency_assumptions()
         
