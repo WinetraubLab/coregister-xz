@@ -204,7 +204,7 @@ class FitPlane:
         """ Return a unit vector in the direction of the normal """
         return np.cross(self.u_direction(), self.v_direction())
         
-    def plane_equation(self):
+    def get_plane_equation(self):
         """ Convert u,v,h to a plane equation ax+by+cz-d=0.
         a,b,c are unitless and d has units of mm """
         normal_vec = self.normal_direction()
@@ -258,7 +258,7 @@ class FitPlane:
         else:
             # We need to find where min_x_mm, max_x_mm are on the plane.
             # To do so, we get the equation ax+by+cz+d=0, and set x to the limits, and z to 0 to find y.
-            a,b,c,d = self.plane_equation()
+            a,b,c,d = self.get_plane_equation()
             min_x_y_mm = -(d+a*min_x_mm)/b
             max_x_y_mm = -(d+a*max_x_mm)/b
             
@@ -276,7 +276,7 @@ class FitPlane:
         else:
             # We need to find where min_y_mm, max_y_mm are on the plane.
             # To do so, we get the equation ax+by+cz+d=0, and set y to the limits, and z to 0 to find x.
-            a,b,c,d = self.plane_equation()
+            a,b,c,d = self.get_plane_equation()
             min_y_x_mm = -(d+b*min_y_mm)/a
             max_y_x_mm = -(d+b*max_y_mm)/a
             
