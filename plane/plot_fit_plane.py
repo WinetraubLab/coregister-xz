@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from plane.fit_plane import FitPlane
 
-def plot_fit_plane(
+def plot_fit_plane_xy(
     fp, #FitPlane or array of FitPlanes
     vLines_mm, # Position of vertical lines
     hLines_mm, # Position of horizontal lines
