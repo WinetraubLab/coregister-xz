@@ -206,7 +206,7 @@ class FitPlane:
         
     def get_plane_equation(self):
         """ Convert u,v,h to a plane equation ax+by+cz-d=0.
-        a,b,c are unitless and d has units of mm """
+        a,b,c are unitless and normalized a^2+b^2+c^2=1 and d has units of mm """
         normal_vec = self.normal_direction()
         a, b, c = normal_vec
         d = -np.dot(normal_vec, self.h)
