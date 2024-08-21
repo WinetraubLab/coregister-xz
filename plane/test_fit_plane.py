@@ -195,12 +195,12 @@ class TestFitPlane(unittest.TestCase):
         pos_uv = self.fp.get_uv_from_xyz(pos_xyz)
         pos_xyz2 = self.fp.get_xyz_from_uv(pos_uv)
         
-        self.assertAlmostEqual(pos_uv[0], u, places=1)
-        self.assertAlmostEqual(pos_uv[1], v, places=1)
+        self.assertAlmostEqual(pos_uv[0], u, places=2)
+        self.assertAlmostEqual(pos_uv[1], v, places=2)
         
-        self.assertAlmostEqualRelative(pos_xyz[0], pos_xyz2[0] , rel_tol=0.1) # Accurate up to 10%
-        self.assertAlmostEqualRelative(pos_xyz[1], pos_xyz2[1] , rel_tol=0.1) # Accurate up to 10%
-        self.assertAlmostEqualRelative(pos_xyz[2], pos_xyz2[2] , rel_tol=0.1) # Accurate up to 10%
+        self.assertAlmostEqualRelative(pos_xyz[0], pos_xyz2[0] , rel_tol=0.01) # Accurate up to 1%
+        self.assertAlmostEqualRelative(pos_xyz[1], pos_xyz2[1] , rel_tol=0.01) # Accurate up to 1%
+        self.assertAlmostEqualRelative(pos_xyz[2], pos_xyz2[2] , rel_tol=0.01) # Accurate up to 1%
         
     def test_check_000_and_physical_conversion(self):
         pos_uv = self.fp.get_uv_from_xyz([0,0,0])
@@ -317,6 +317,26 @@ class TestFitPlane(unittest.TestCase):
     def test_edge_cases_that_used_to_fail(self):
         # This use to give error: u,v are not the same norm
         FitPlane.from_fitting_points_on_photobleach_lines([[[1407, 282], [1407, 363]], [[1623, 282], [1623, 363]], [[1844, 282], [1844, 359]], [[4484, 282], [4484, 359]], [[4736, 282], [4736, 359]], [[4885, 282], [4889, 359]], [[5267, 278], [5294, 359]]],[-0.92, -0.65, -0.56, -0.38, 0.41000000000000003, 0.5, 0.59],["h", "h", "h", "h", "v", "v", "v"])
-        
+
+    def test_v_line_plane_intercept(self):
+        # Check that the equation for v intercept does produce points on the intercept
+        x_ref = 10
+        a, b, c = self.fp.v_line_plane_intercept(x_ref)
+        def my_pt(t):
+            if abs(a)<0.1:
+                u = t
+                v = -(a*u+c)/b
+            else:
+                v = t
+                u = -(b*v+c)/a     
+            return u,v
+        def check_point(t):
+            u,v = my_pt(t) 	
+            pt = self.fp.get_xyz_from_uv([u,v])
+            self.assertAlmostEqual(pt[0],x_ref,places=2)
+        check_point(0)
+        check_point(15)
+        check_point(-18)
+
 if __name__ == '__main__':
     unittest.main()
