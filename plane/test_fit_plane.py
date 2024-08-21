@@ -4,7 +4,7 @@ import numpy.testing as npt
 import matplotlib.pyplot as plt
 import unittest
 from plane.fit_plane import FitPlane
-from plane.plot_fit_plane import plot_fit_plane
+from plane.plot_fit_plane import plot_fit_plane_xy
 
 
 class TestFitPlane(unittest.TestCase):
@@ -287,7 +287,7 @@ class TestFitPlane(unittest.TestCase):
         self.assertEqual(json_str1, json_str2)
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
-        plot_fit_plane(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
+        plot_fit_plane_xy(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
 
     def test_all_plots_are_legible(slef):
         # Define planes
@@ -301,10 +301,10 @@ class TestFitPlane(unittest.TestCase):
         
         # Plot them
         fig, axs = plt.subplots(1,4, figsize=(9, 3))
-        plot_fit_plane(fp1, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0])
-        plot_fit_plane(fp2, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1])
-        plot_fit_plane(fp3, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[2])
-        plot_fit_plane(fp4, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[3])
+        plot_fit_plane_xy(fp1, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[0])
+        plot_fit_plane_xy(fp2, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[1])
+        plot_fit_plane_xy(fp3, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[2])
+        plot_fit_plane_xy(fp4, v_photobleach_line_position_mm, h_photobleach_line_position_mm, ax=axs[3])
         axs[0].set_title('Cut Position 1')
         axs[1].set_title('Cut Position 2')
         axs[2].set_title('Cut Position 3')
