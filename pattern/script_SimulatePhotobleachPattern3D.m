@@ -24,7 +24,7 @@ oct_scan_mm = [-0.25 0.25]; % OCT x-y scan size
 % oct_scan_mm = nan;
 
 % Simulation output
-output_tiff_file = 'out.tiff';
+output_tiff_file = 'out_xz.tiff';
 
 %% Configurable Parameters
 % Gausian base waist
