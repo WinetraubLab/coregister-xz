@@ -16,7 +16,7 @@ z_grid_mm =  0.00:2e-3:0.10;
 NA = 0.35; % Match NA to observed photobleach pattern. For 40x use 0.35 (though lens NA is 0.8)
 lambda_mm = 900e-9*1e3; % Wavelength in m
 n = 1.4; % Medium index of refraction
-photobleach_intensity = 40; % Can be any number >0
+photobleach_intensity = 40/(diff(y_grid_mm(1:2))/1e-3); % Can be any number >0
 
 % Plot OCT volume on top?
 oct_scan_mm = [-0.25 0.25]; % OCT x-y scan size
