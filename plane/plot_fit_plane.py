@@ -4,8 +4,8 @@ from plane.fit_plane import FitPlane
 
 def plot_fit_plane_xy(
     fp, #FitPlane or array of FitPlanes
-    vLines_mm, # Position of vertical lines
-    hLines_mm, # Position of horizontal lines
+    v_lines_mm, # Position of vertical lines
+    h_lines_mm, # Position of horizontal lines
     oct_scan_size_mm=0.5, # Size of the OCT scan around the center
     plot_bound_mm=2.5, # How big to plot
     reverse_plot=False, # Set to true if the flourecence image is reversed
@@ -24,10 +24,10 @@ def plot_fit_plane_xy(
         show_at_end = False
     
     # Plot photobleach lines pattern
-    for vline in vLines_mm:
-        ax.axvline(x=vline, color='r', linestyle='-')
-    for hline in hLines_mm:
-        ax.axhline(y=hline, color='b', linestyle='-')
+    for v_line in v_lines_mm:
+        ax.axvline(x=v_line, color='r', linestyle='-')
+    for h_line in h_lines_mm:
+        ax.axhline(y=h_line, color='b', linestyle='-')
     
     # Plot OCT Scan
     square_x = [-oct_scan_size_mm/2, oct_scan_size_mm/2, oct_scan_size_mm/2, -oct_scan_size_mm/2, -oct_scan_size_mm/2]
@@ -37,10 +37,10 @@ def plot_fit_plane_xy(
     # Draw the planes
     for fp_instance in fp:
         pt1,pt2 = fp_instance.get_xy_projection(
-            min_x_mm = min(vLines_mm)-0.1,
-            max_x_mm = max(vLines_mm)+0.1,
-            min_y_mm = min(hLines_mm)-0.1,
-            max_y_mm = max(hLines_mm)+0.1,
+            min_x_mm = min(v_lines_mm)-0.1,
+            max_x_mm = max(v_lines_mm)+0.1,
+            min_y_mm = min(h_lines_mm)-0.1,
+            max_y_mm = max(h_lines_mm)+0.1,
             )
         d = pt2-pt1
         ax.arrow(pt1[0], pt1[1], d[0], d[1], color='k', head_width=0.1, head_length=0.1)
