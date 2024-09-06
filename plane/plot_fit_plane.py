@@ -34,7 +34,7 @@ def plot_fit_plane_xy(
     square_y = [-oct_scan_size_mm/2, -oct_scan_size_mm/2, oct_scan_size_mm/2, oct_scan_size_mm/2, -oct_scan_size_mm/2]
     ax.plot(square_x, square_y, color='k', linestyle=':')
     
-    # Draw the planes
+    # Draw the cut planes (arrows)
     for fp_instance in fp:
         pt1,pt2 = fp_instance.get_xy_projection(
             min_x_mm = min(v_lines_mm)-0.1,
