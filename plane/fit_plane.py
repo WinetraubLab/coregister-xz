@@ -238,7 +238,7 @@ class FitPlane:
         return np.array([u_pix, v_pix])
         
     def get_xy_projection(self, min_x_mm=None, max_x_mm=None, min_y_mm=None, max_y_mm=None):
-        """ When lookin at the pattern from above, return two points from the projected line 
+        """ When lookin at the pattern from above, return two points on the fit plane that form a line. 
         The line would go from point1 --> point2 where u value increases.
         
         USAGE:
