@@ -244,7 +244,7 @@ class TestFitPlane(unittest.TestCase):
         
     
     def test_xy_projection(self):
-        pt1, pt2 = self.fp.get_xy_projection()
+        pt1, pt2 = self.fp.get_fit_plane_xy_projection()
         
         self.assertEqual(len(pt1),2) # make sure returning values are only x,y
         self.assertEqual(len(pt2),2) # make sure returning values are only x,y
@@ -256,7 +256,7 @@ class TestFitPlane(unittest.TestCase):
         x_min_mm = -1
         x_max_mm = 1
         
-        pt1, pt2 = self.fp.get_xy_projection(min_x_mm=x_min_mm, max_x_mm=x_max_mm)
+        pt1, pt2 = self.fp.get_fit_plane_xy_projection(min_x_mm=x_min_mm, max_x_mm=x_max_mm)
         pt_min_x, pt_max_x = min(pt1[0], pt2[0]), max(pt1[0], pt2[0])
         
         # Check that x limits are "respected"
@@ -270,7 +270,7 @@ class TestFitPlane(unittest.TestCase):
         y_min_mm = -1
         y_max_mm = 1
         
-        pt1, pt2 = self.fp.get_xy_projection(min_y_mm=y_min_mm, max_y_mm=y_max_mm)
+        pt1, pt2 = self.fp.get_fit_plane_xy_projection(min_y_mm=y_min_mm, max_y_mm=y_max_mm)
         pt_min_y, pt_max_y = min(pt1[1], pt2[1]), max(pt1[1], pt2[1])
         
         # Check that x limits are "respected"

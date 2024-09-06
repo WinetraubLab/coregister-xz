@@ -36,7 +36,7 @@ def plot_fit_plane_xy(
     
     # Draw the cut planes (arrows)
     for fp_instance in fp:
-        pt1,pt2 = fp_instance.get_xy_projection(
+        pt1,pt2 = fp_instance.get_fit_plane_xy_projection(
             min_x_mm = min(v_lines_mm)-0.1,
             max_x_mm = max(v_lines_mm)+0.1,
             min_y_mm = min(h_lines_mm)-0.1,

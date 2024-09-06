@@ -237,13 +237,13 @@ class FitPlane:
         
         return np.array([u_pix, v_pix])
         
-    def get_xy_projection(self, min_x_mm=None, max_x_mm=None, min_y_mm=None, max_y_mm=None):
+    def get_fit_plane_xy_projection(self, min_x_mm=None, max_x_mm=None, min_y_mm=None, max_y_mm=None):
         """ When lookin at the pattern from above, return two points on the fit plane that form a line. 
         The line would go from point1 --> point2 where u value increases.
         
         USAGE:
-            pt1, pt2 = get_xy_projection()
-            pt1, pt2 = get_xy_projection(min_x_mm = 0, max_x_mm = 10, min_y_mm = 0, max_y_mm = 10)
+            pt1, pt2 = get_fit_plane_xy_projection()
+            pt1, pt2 = get_fit_plane_xy_projection(min_x_mm = 0, max_x_mm = 10, min_y_mm = 0, max_y_mm = 10)
             
         INPUTS:
             If none of the optional inputs are defined then line will be (u,v): (0,0) --> (c_u,c_v)
