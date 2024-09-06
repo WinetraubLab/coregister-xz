@@ -321,7 +321,7 @@ class TestFitPlane(unittest.TestCase):
     def test_v_line_plane_intercept(self):
         # Check that the equation for v intercept does produce points on the intercept
         x_ref = 10
-        a, b, c = self.fp.v_line_plane_intercept(x_ref)
+        a, b, c = self.fp.v_line_fit_plane_intercept(x_ref)
         def my_pt(t):
             if abs(a)<0.1:
                 u = t
@@ -341,7 +341,7 @@ class TestFitPlane(unittest.TestCase):
     def test_h_line_plane_intercept(self):
         # Check that the equation for h intercept does produce points on the intercept
         y_ref = 10
-        a, b, c = self.fp.h_line_plane_intercept(y_ref)
+        a, b, c = self.fp.h_line_fit_plane_intercept(y_ref)
         def my_pt(t):
             if abs(a)<0.1:
                 u = t

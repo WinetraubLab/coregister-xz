@@ -250,6 +250,8 @@ class FitPlane:
             If min_x_mm, max_x_mm are defined pt1[0] = min_x_mm, pt2[0] = max_x_mm. 
             If min_y_mm, max_y_mm are defined pt1[1] = min_y_mm, pt2[1] = max_y_mm. 
             If both sets of x and y are defined, we will use the outmost inclusive set
+        OUTPUTS:
+            (pt1, pt2) where each pt is [x,y,z]
         """
         # Get the points on the plane that satisfy the x condition
         no_x_limit = min_x_mm is None or max_x_mm is None
@@ -337,7 +339,7 @@ class FitPlane:
             'recommended_center_pix': self.recommended_center_pix.tolist()
             })
 
-    def v_line_plane_intercept(self, line_position_mm):
+    def v_line_fit_plane_intercept(self, line_position_mm):
         """ 
         Returns a,b that correspond to the equation a*v+b*u+c=0. 
         u,v are in pixels. a^2+b^2=1
@@ -365,7 +367,7 @@ class FitPlane:
         norm = np.sqrt(a_out**2 + b_out**2)
         return (a_out/norm, b_out/norm, c_out/norm)
 
-    def h_line_plane_intercept(self, line_position_mm):
+    def h_line_fit_plane_intercept(self, line_position_mm):
         """ 
         Returns a,b that correspond to the equation a*v+b*u+c=0. 
         u,v are in pixels. a^2+b^2=1
