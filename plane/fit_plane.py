@@ -339,9 +339,9 @@ class FitPlane:
             'recommended_center_pix': self.recommended_center_pix.tolist()
             })
 
-    def v_line_fit_plane_intercept(self, line_position_mm):
+    def get_v_line_fit_plane_intercept(self, line_position_mm):
         """ 
-        Returns a,b that correspond to the equation a*v+b*u+c=0. 
+        Returns a,b,c that correspond to the equation a*u+b*v+c=0. 
         u,v are in pixels. a^2+b^2=1
         The equation corresponds to where on the image plane intersects a vertical
         line x=line_position_mm.
@@ -367,9 +367,9 @@ class FitPlane:
         norm = np.sqrt(a_out**2 + b_out**2)
         return (a_out/norm, b_out/norm, c_out/norm)
 
-    def h_line_fit_plane_intercept(self, line_position_mm):
+    def get_h_line_fit_plane_intercept(self, line_position_mm):
         """ 
-        Returns a,b that correspond to the equation a*v+b*u+c=0. 
+        Returns a,b,c that correspond to the equation a*u+b*v+c=0. 
         u,v are in pixels. a^2+b^2=1
         The equation corresponds to where on the image plane intersects a horizontal 
         line y=line_position_mm.

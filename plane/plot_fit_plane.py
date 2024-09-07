@@ -58,3 +58,54 @@ def plot_fit_plane_xy(
 
     if show_at_end:
         plt.show()
+
+def plot_fit_plane_uv(
+    fp, #FitPlane or array of FitPlanes
+    v_lines_mm, # Position of vertical lines
+    h_lines_mm, # Position of horizontal lines
+    v_range, # tuple (min_v, max_v) in pixels
+    ax=None, # Set to axs if plotting in a subplot is needed, use None otherwise
+    ):
+    """ Plot the fit plane from above (uv projection) """
+
+    # Input checks
+    if ax is None:
+        _, ax = plt.subplots()
+        show_at_end = True
+    else:
+        show_at_end = False
+
+    # Resize
+    fig = ax.figure
+    fig.set_size_inches(10, 2)
+
+    # Intercept satisfies a*u+b*v+c=0
+    def plot_intercept(a, b, c, color, label):
+        # Compute points u,v
+        v1, v2 = v_range
+        u1 = -(c+b*v1)/a
+        u2 = -(c+b*v2)/a
+
+        # Plot
+        ax.plot([u1, u2],[v1, v2],color=color, linestyle='-', label=label)
+
+    # Loop over photobleach lines v and h
+    for v_line in v_lines_mm:
+        a,b,c = fp.get_v_line_fit_plane_intercept(v_line)
+        plot_intercept(a,b,c,'r','')
+    plot_intercept(a,b,c,'r','v')
+    for h_line in h_lines_mm:
+        a,b,c = fp.get_h_line_fit_plane_intercept(h_line)
+        plot_intercept(a,b,c,'b','')
+    plot_intercept(a,b,c,'b','h')
+  
+    # Set titles, axis etc
+    ax.set_xlabel('U[pix]')
+    ax.set_ylabel('V[pix]')
+    ax.grid(True)
+    ax.set_aspect('equal')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.8, -0.2), ncol=2)
+
+    if show_at_end:
+        plt.show()
+

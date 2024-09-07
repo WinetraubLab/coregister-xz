@@ -4,7 +4,7 @@ import numpy.testing as npt
 import matplotlib.pyplot as plt
 import unittest
 from plane.fit_plane import FitPlane
-from plane.plot_fit_plane import plot_fit_plane_xy
+from plane.plot_fit_plane import plot_fit_plane_xy, plot_fit_plane_uv
 
 
 class TestFitPlane(unittest.TestCase):
@@ -357,6 +357,9 @@ class TestFitPlane(unittest.TestCase):
         check_point(0)
         check_point(15)
         check_point(-18)
+
+    def test_plot_fit_plane_uv_doesnt_throw_an_error(self):
+        plot_fit_plane_uv(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6],(-50,50))
 
 if __name__ == '__main__':
     unittest.main()
