@@ -287,17 +287,17 @@ class TestFitPlane(unittest.TestCase):
         self.assertEqual(json_str1, json_str2)
         
     def test_plot_fit_plane_doesnt_throw_an_error(self):
-        plot_fit_plane_xy(self.fp,[ 0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
+        plot_fit_plane_xy(self.fp,[0.6, 0.7, 0.8],[-0.2, -0.3, -0.4, -0.6])
 
     def test_all_plots_are_legible(slef):
         # Define planes
         v_photobleach_line_position_mm = np.array([0.41, 0.5 , 0.59])
         h_photobleach_line_position_mm = np.array([-0.92, -0.65, -0.56, -0.38])
         pos = np.max([np.max(np.abs(v_photobleach_line_position_mm)), np.max(np.abs(h_photobleach_line_position_mm))])
-        fp1 = FitPlane(u=[1,-1,0],v=[0,0,1.41],h=[+1*pos, 0, 0])
-        fp2 = FitPlane(u=[1,+1,0],v=[0,0,1.41],h=[-1*pos, 0, 0])
-        fp3 = FitPlane(u=[1,-1,0],v=[0,0,1.41],h=[-2*pos, 0, 0])
-        fp4 = FitPlane(u=[1,+1,0],v=[0,0,1.41],h=[+2*pos, 0, 0])
+        fp1 = FitPlane(u_mm=[1,-1,0],v_mm=[0,0,1.41],h_mm=[+1*pos, 0, 0])
+        fp2 = FitPlane(u_mm=[1,+1,0],v_mm=[0,0,1.41],h_mm=[-1*pos, 0, 0])
+        fp3 = FitPlane(u_mm=[1,-1,0],v_mm=[0,0,1.41],h_mm=[-2*pos, 0, 0])
+        fp4 = FitPlane(u_mm=[1,+1,0],v_mm=[0,0,1.41],h_mm=[+2*pos, 0, 0])
         
         # Plot them
         fig, axs = plt.subplots(1,4, figsize=(9, 3))
@@ -321,7 +321,7 @@ class TestFitPlane(unittest.TestCase):
     def test_v_line_plane_intercept(self):
         # Check that the equation for v intercept does produce points on the intercept
         x_ref = 10
-        a, b, c = self.fp.v_line_fit_plane_intercept(x_ref)
+        a, b, c = self.fp.get_v_line_fit_plane_intercept(x_ref)
         def my_pt(t):
             if abs(a)<0.1:
                 u = t
@@ -341,7 +341,7 @@ class TestFitPlane(unittest.TestCase):
     def test_h_line_plane_intercept(self):
         # Check that the equation for h intercept does produce points on the intercept
         y_ref = 10
-        a, b, c = self.fp.h_line_fit_plane_intercept(y_ref)
+        a, b, c = self.fp.get_h_line_fit_plane_intercept(y_ref)
         def my_pt(t):
             if abs(a)<0.1:
                 u = t

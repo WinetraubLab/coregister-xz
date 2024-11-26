@@ -85,9 +85,9 @@ class FitPlane:
         data = json.loads(json_str)
         # Create a new FitPlane object using the parsed data
         return cls(
-            u=data['u'],
-            v=data['v'],
-            h=data['h'],
+            u_mm=data['u'],
+            v_mm=data['v'],
+            h_mm=data['h'],
             recommended_center_pix=data['recommended_center_pix']
         )
     
@@ -187,7 +187,7 @@ class FitPlane:
         if not ( slope < min_ratio):
             raise ValueError(
                 'Make sure that tissue surface is parallel to x axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope'
-                % (slope, np.degrees(np.arcsin(slope)),min_ratio))
+                % (slope, np.degrees(np.arctan(slope)),min_ratio))
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """
