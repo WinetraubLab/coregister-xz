@@ -5,10 +5,10 @@ from scipy.optimize import minimize
 class FitPlane:
     
     """ Begin constractor methods """
-    def __init__(self,u=None,v=None,h=None,recommended_center_pix=[0,0]):
-        self.u = np.array(u)
-        self.v = np.array(v)
-        self.h = np.array(h)
+    def __init__(self,u_mm=None,v_mm=None,h_mm=None,recommended_center_pix=[0,0]):
+        self.u = np.array(u_mm) # mm
+        self.v = np.array(v_mm) # mm
+        self.h = np.array(h_mm) # mm
         self.recommended_center_pix = np.array(recommended_center_pix)
         
         if u is not None and v is not None and h is not None:
