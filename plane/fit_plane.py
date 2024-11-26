@@ -6,14 +6,19 @@ class FitPlane:
     
     """ Begin constractor methods """
     def __init__(self,u_mm=None,v_mm=None,h_mm=None,recommended_center_pix=[0,0]):
-        self.u = np.array(u_mm) # mm
-        self.v = np.array(v_mm) # mm
-        self.h = np.array(h_mm) # mm
-        self.recommended_center_pix = np.array(recommended_center_pix)
-        
-        if u is not None and v is not None and h is not None:
+
+        if u_mm is not None and v_mm is not None and h_mm is not None:
+            self.u = np.array(u_mm) # mm
+            self.v = np.array(v_mm) # mm
+            self.h = np.array(h_mm) # mm
+            self.recommended_center_pix = np.array(recommended_center_pix)
             self._check_u_v_consistency_assumptions()
-    
+        else:
+            self.u = None
+            self.v = None
+            self.h = None
+            self.recommended_center_pix = None
+
     @classmethod
     def from_fitting_points_on_photobleach_lines(cls, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
