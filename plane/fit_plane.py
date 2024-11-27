@@ -177,16 +177,16 @@ class FitPlane:
     
         # Check u and v are orthogonal and have the same norm
         if not (np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.05):
-            raise ValueError('u and v should have the same norm')
+            raise ValueError('u and v should have the same norm. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/')
         if not (np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.05):
-            raise ValueError('u must be orthogonal to v')
+            raise ValueError('u must be orthogonal to v. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/')
         
         # Check that u vec is more or less in the x-y plane
         min_ratio = 0.15
         slope = abs(self.u[2]) / np.linalg.norm(self.u[:2])
         if not ( slope < min_ratio):
             raise ValueError(
-                'Make sure that tissue surface is parallel to x axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope'
+                'Make sure that tissue surface is parallel to x axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/'
                 % (slope, np.degrees(np.arctan(slope)),min_ratio))
 
     def u_norm_mm(self):
