@@ -5,14 +5,14 @@ from scipy.optimize import minimize
 class FitPlane:
     
     """ Begin constractor methods """
-    def __init__(self,u_mm=None,v_mm=None,h_mm=None,recommended_center_pix=[0,0]):
+    def __init__(self,u_mm=None,v_mm=None,h_mm=None,recommended_center_pix=[0,0], skip_uv_value_cheks=False):
 
         if u_mm is not None and v_mm is not None and h_mm is not None:
             self.u = np.array(u_mm) # mm
             self.v = np.array(v_mm) # mm
             self.h = np.array(h_mm) # mm
             self.recommended_center_pix = np.array(recommended_center_pix)
-            self._check_u_v_consistency_assumptions()
+            self._check_u_v_consistency_assumptions(skip_uv_value_cheks)
         else:
             self.u = None
             self.v = None
@@ -179,17 +179,17 @@ class FitPlane:
     
         # Check u and v are orthogonal and have the same norm
         if not (np.abs(self.u_norm_mm() - self.v_norm_mm())/self.v_norm_mm() < 0.05):
-            raise ValueError('u and v should have the same norm. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/')
+            raise ValueError('u and v should have the same norm, see: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/edit')
         if not (np.dot(self.u,self.v)/(self.u_norm_mm()*self.v_norm_mm()) < 0.05):
-            raise ValueError('u must be orthogonal to v. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/')
+            raise ValueError('u must be orthogonal to v see: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/edit')
         
-        # Check that u vec is more or less in the x-y plane
-        min_ratio = 0.15
-        slope = abs(self.u[2]) / np.linalg.norm(self.u[:2])
-        if not ( slope < min_ratio):
+        # Check that u vec is more or less in the x-y plane and that v points toward z
+        ratio = np.sqrt((self.v[0]**2+self.v[1]**2)/(self.u[0]**2+self.u[1]**2))
+        min_ratio = 0.17        
+        if not ( ratio < min_ratio):
             raise ValueError(
-                'Make sure that tissue surface is parallel to x axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope. See link: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/'
-                % (slope, np.degrees(np.arctan(slope)),min_ratio))
+                'Make sure that tissue surface is parallel to x axis, and section is such v points z axis. Slope is %.2f (%.0f deg) which is higher than target <%.2f slope.  see: https://docs.google.com/presentation/d/1uh6tizdCt6uHBrgP91z-1wh_s7IqIcK0Vase-nJyxs8/edit'
+                % (ratio, np.degrees(np.arctan(ratio)),min_ratio))
 
     def u_norm_mm(self):
         """ Return the size of pixel u in mm """

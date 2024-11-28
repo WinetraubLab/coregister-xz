@@ -102,7 +102,7 @@ class TestFitPlane(unittest.TestCase):
 
     def test_plane_equation(self):
         # Test with plane z=50
-        f = FitPlane([1,0,0],[0,1,0],[10,0,50])
+        f = FitPlane([1,0,0],[0,1,0],[10,0,50],skip_uv_value_cheks=True)
         a,b,c,d = f.get_plane_equation()
         
         self.assertAlmostEqual(a, 0, places=1)
