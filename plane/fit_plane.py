@@ -22,7 +22,8 @@ class FitPlane:
     @classmethod
     def from_fitting_points_on_photobleach_lines(cls, 
         fluorescence_image_points_on_line_pix, photobleach_line_position_mm, photobleach_line_group,
-        print_inputs = False):
+        print_inputs = False,
+        skip_uv_value_cheks=False):
         """
         This function initialize FitPlane by points on photobleach lines.
         
@@ -31,8 +32,9 @@ class FitPlane:
                 find at least two points in the fluorescence image. Mark the coordinates as pixel values
                 l1 = [[x1,y1],[x2,y2],...] and create an array of those [l1,l2,...,ln]
             photobleach_line_position_mm: an array defining the position (in mm) of each of the photobleach line positions 
-            photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...] etc
+            photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...]
             print_inputs: prints to screen the inputs of the function for debug purposes.
+            skip_uv_value_cheks: skip checks, not recommended!
         """
         fp = cls()
 
@@ -63,14 +65,14 @@ class FitPlane:
         fp.h[2] = 0
         
         # Check
-        fp._check_u_v_consistency_assumptions()
+        fp._check_u_v_consistency_assumptions(skip_uv_value_cheks)
         
         # Find recomended_center according to this logic:
         # c_u - according to the location that norm hits the plane
         # c_v - center of the fluorescence_image_points_on_line_pix
         v_coordinates = np.array([item[1] for sublist in fluorescence_image_points_on_line_pix for item in sublist])
         c_v = np.mean(v_coordinates)
-        o = fp.get_uv_from_xyz([0,0,0])
+        o = fp.get_uv_from_xyz([0,0,0], skip_uv_value_cheks=True)
         c_u = o[0]
         fp.recommended_center_pix = np.array([c_u, c_v])
         
@@ -224,13 +226,13 @@ class FitPlane:
         v_pix = point_pix[1]
         return (self.u*u_pix + self.v*v_pix + self.h)
     
-    def get_uv_from_xyz(self, point_mm):
+    def get_uv_from_xyz(self, point_mm, skip_uv_value_cheks=False):
         """ Get the u,v coordinates on an image from a point in space, if point is outside the plane, return the u,v of the closest point. point_mm is a 3D numpy array or array """
 	
         point_mm = np.array(point_mm)        
 
         # Assuming u is orthogonal to v (as it shuld) for this function to work
-        self._check_u_v_consistency_assumptions()
+        self._check_u_v_consistency_assumptions(skip_uv_value_cheks)
         
         u_hat = self.u_direction()
         u_norm = self.u_norm_mm()
