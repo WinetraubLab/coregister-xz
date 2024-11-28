@@ -4,6 +4,7 @@ import numpy.testing as npt
 import matplotlib.pyplot as plt
 import unittest
 import image_processing.fluorescent_image_preprocessing as t
+from image_processing.draw_fluorescent_image import draw_fluorescent_image
 import cv2
 import matplotlib.pyplot as plt
 
@@ -131,7 +132,26 @@ class TestFluorescentImagePreProcessing(unittest.TestCase):
 
         # Verify that the old pixel is now black
         self.assertLess(image_out[int(rotated_pt[0][1][1]),int(rotated_pt[0][1][0]),2],50);
+
+    def test_draw_fluorescent_image(self):
+        # Set input image
+        image = cv2.cvtColor(cv2.imread(
+            'image_processing/fluorescence_image_example.png'),cv2.COLOR_BGR2RGB)
+        fluorescence_image_points_on_line_pix = [
+                [ [ 205, 712], [ 217, 748] ], # A few points on line 0 (v)
+                [ [ 325, 656], [ 328, 690] ], # A few points on line 1 (v)
+                [ [ 392, 618], [ 418, 645] ], # ...
+                [ [ 826, 360], [ 848, 385] ],
+                [ [ 973, 280], [ 984, 310] ],
+                [ [1009, 258], [1022, 294] ],
+                [ [1068, 194], [1080, 233] ], # A few points on line 6 (h)
+                ]
+        photobleach_line_group = 'vvvhhhh'
         
+        draw_fluorescent_image(
+            image,
+            fluorescence_image_points_on_line_pix,
+            photobleach_line_group)
         
 if __name__ == '__main__':
     unittest.main()
