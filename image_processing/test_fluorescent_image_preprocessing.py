@@ -100,7 +100,7 @@ class TestFluorescentImagePreProcessing(unittest.TestCase):
         self.assertGreater(image[int(rotated_pt[0][1][1]),int(rotated_pt[0][1][0]),2], 50);
 
         # Find optimal solution and rotate back    
-        pt_out, image_out = t.rotate_image_to_meet_consistency_assumptions(
+        pt_out, image_out, theta_rad = t.rotate_image_to_meet_consistency_assumptions(
             rotated_pt,
             self.default_photobleach_line_position_mm,
             self.default_photobleach_line_group,
@@ -134,6 +134,9 @@ class TestFluorescentImagePreProcessing(unittest.TestCase):
 
         # Verify that the old pixel is now black
         self.assertLess(image_out[int(rotated_pt[0][1][1]),int(rotated_pt[0][1][0]),2],50);
+
+        # Verify angle is as projected
+        self.assertAlmostEqual(theta_rad, np.pi/4)
 
     def test_draw_fluorescent_image(self):
         # Set input image

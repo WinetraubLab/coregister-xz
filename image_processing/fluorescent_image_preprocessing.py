@@ -18,6 +18,9 @@ with barcodes to make sure they meet _check_u_v_consistency_assumptions set by f
     :fluorescence_image: cv object with the image
 
     OUTPUT: Same as input but rotated to maximize u-v consistency
+        fluorescence_image_points_on_line_pix
+        photobleach_line_position_mm
+        angle_rad
 
     """
 def rotate_image_to_meet_consistency_assumptions(
@@ -48,7 +51,7 @@ def rotate_image_to_meet_consistency_assumptions(
         fluorescence_image, M, (fluorescence_image.shape[1], fluorescence_image.shape[0]),
         flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
-    return fluorescence_image_points_on_line_pix_out, fluorescence_image_out
+    return fluorescence_image_points_on_line_pix_out, fluorescence_image_out, theta_rad
 
 
 # Optimize rotation angle, output is the optimum
