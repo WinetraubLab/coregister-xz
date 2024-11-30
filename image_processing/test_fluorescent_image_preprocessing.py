@@ -70,6 +70,7 @@ class TestFluorescentImagePreProcessing(unittest.TestCase):
             # Optimize, see that the result angle is back to the optimum (0 rotation)
             optimized_theta = t._rotate_points_to_optimize_uv(
                 rotated_pt,
+                self.default_photobleach_line_position_mm,
                 self.default_photobleach_line_group)
 
             # Check that optimal rotation brings back to default
@@ -101,6 +102,7 @@ class TestFluorescentImagePreProcessing(unittest.TestCase):
         # Find optimal solution and rotate back    
         pt_out, image_out = t.rotate_image_to_meet_consistency_assumptions(
             rotated_pt,
+            self.default_photobleach_line_position_mm,
             self.default_photobleach_line_group,
             image)
 

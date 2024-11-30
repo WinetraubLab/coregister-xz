@@ -13,7 +13,8 @@ with barcodes to make sure they meet _check_u_v_consistency_assumptions set by f
     INPUTS:
     :fluorescence_image_points_on_line_pix: List of points. Dimensions are
         [line number][point number on the line][0=u,1=v]
-    :photobleach_line_group: an array defining each line is a horizontal or vertical line ['h','v',...]
+    :photobleach_line_position_mm: see photobleach_pattern.py Pattern.project_pattern_onto_plane
+    :photobleach_line_group: see photobleach_pattern.py Pattern.project_pattern_onto_plane
     :fluorescence_image: cv object with the image
 
     OUTPUT: Same as input but rotated to maximize u-v consistency
@@ -21,12 +22,14 @@ with barcodes to make sure they meet _check_u_v_consistency_assumptions set by f
     """
 def rotate_image_to_meet_consistency_assumptions(
     fluorescence_image_points_on_line_pix,
+    photobleach_line_position_mm,
     photobleach_line_group,
     fluorescence_image):
 
     # Get the angle
     theta_rad = _rotate_points_to_optimize_uv(
         fluorescence_image_points_on_line_pix,
+        photobleach_line_position_mm,
         photobleach_line_group)
 
     # Rotate points along the center of the image
@@ -51,6 +54,7 @@ def rotate_image_to_meet_consistency_assumptions(
 # Optimize rotation angle, output is the optimum
 def _rotate_points_to_optimize_uv(
     fluorescence_image_points_on_line_pix,
+    photobleach_line_position_mm,
     photobleach_line_group):
 
     def error_fun(theta_rad, is_print=False):
@@ -60,7 +64,8 @@ def _rotate_points_to_optimize_uv(
             fluorescence_image_points_on_line_pix, theta_rad)
 
         fp = FitPlane.from_fitting_points_on_photobleach_lines(
-            pt_rot, range(len(pt_rot)),
+            pt_rot,
+            photobleach_line_position_mm,
             photobleach_line_group,
             skip_uv_value_cheks=True,
             )
