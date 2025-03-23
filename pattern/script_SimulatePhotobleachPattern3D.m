@@ -46,18 +46,26 @@ for zi=length(z_grid_mm):-1:1
     % Loop over all lines
     for lineI=1:length(x_start_mm)
 
-        if y_start_mm(lineI) == y_end_mm(lineI)
-            % Horizontal line  
-            yI = abs(yy_mm-y_start_mm(lineI)) < pixel_size_mm;
-            xI = xx_mm >= min(x_start_mm(lineI),x_end_mm(lineI)) & ...
-                 xx_mm <= max(x_start_mm(lineI),x_end_mm(lineI));
+        % Line length and tolerance
+        line_length = sqrt((x_end_mm(lineI) - x_start_mm(lineI))^2 + (y_end_mm(lineI) - y_start_mm(lineI))^2);
+       
 
-        elseif x_start_mm(lineI) == x_end_mm(lineI)
-            % Vertical line
-            xI = abs(xx_mm-x_start_mm(lineI))<pixel_size_mm;
-            yI = yy_mm >= min(y_start_mm(lineI),y_end_mm(lineI)) & ...
-                 yy_mm <= max(y_start_mm(lineI),y_end_mm(lineI));
-        end
+        % Compute distance from each pixel to the line
+        distance = abs((y_end_mm(lineI) - y_start_mm(lineI)) * xx_mm - ...
+                       (x_end_mm(lineI) - x_start_mm(lineI)) * yy_mm + ...
+                       x_end_mm(lineI) * y_start_mm(lineI) - y_end_mm(lineI) * x_start_mm(lineI)) / line_length;
+
+        % Check if pixel projection lies within line segment bounds
+        dot_product = (xx_mm - x_start_mm(lineI)) * (x_end_mm(lineI) - x_start_mm(lineI)) + ...
+                      (yy_mm - y_start_mm(lineI)) * (y_end_mm(lineI) - y_start_mm(lineI));
+
+        % Logical index of pixels close to the line and within segment bounds
+        on_segment = (dot_product >= 0) & (dot_product <= line_length^2);
+        close_to_line = distance < pixel_size_mm;
+
+        % Combine conditions
+        xI = on_segment & close_to_line;
+        yI = xI; % Same indexing applies to yI
 
 
         % Gausian waist at the depth we are
