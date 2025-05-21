@@ -1,30 +1,131 @@
-% Run this demo to use Thorlabs system to photobleach a pattern of a square
-% with an L shape on its side
-
+% Run this script to use Thorlabs system to scan a 3D OCT Volume and
+% photobleach a given XZ pattern.
+% This script performs:  
+% 1. Low-res surface detection scan
+% 2. High-res OCT volume scan of tissue
+% 3. Precision XZ pattern photobleaching using the identified surface alignment
+% 4. Reconstruct 3D OCT volume from high-res Z-stack
 % Before running this script, make sure myOCT folder is in path for example
 % by running: addpath(genpath('F:\Jenkins\Scan OCTHist Dev\workspace\'))
+% Configure the parameters in the INPUTS sections bellow:
 
-%% Inputs
+%% INPUTS [1/2] - Perform Main OCT Scan
 
-% When set to true the stage will not move and we will not
-% photobleach. Use "true" when you would like to see the output without
-% physcaily running the test.
-skipHardware = false;
+% Define the 3D Volume
+pixel_size_um = 1; % x-y Pixel size in microns
+xOverall_mm = [-0.25 0.25]; % Define the overall volume you would like to scan [start, finish]. OBJECTIVE_DEPENDENT: For 10x use [-0.5 0.5], for 40x use [-0.25 0.25]
+yOverall_mm = [-0.25 0.25]; % Define the overall volume you would like to scan [start, finish]. OBJECTIVE_DEPENDENT: For 10x use [-0.5 0.5], for 40x use [-0.25 0.25]
 
-% OCT probe
-octProbePath = yOCTGetProbeIniPath('40x','OCTP900'); % Select lens magnification
+% Define probe
+octProbePath = yOCTGetProbeIniPath('40x','OCTP900'); % Inputs to the function are OBJECTIVE_DEPENDENT: '10x' or '40x', and scanning system dependent 'OCTP900' or ''
+octProbeFOV_mm = 0.5; % How much of the field of view to use from the probe. OBJECTIVE_DEPENDENT: For 10x use 1, for 40x use 0.5
+oct2stageXYAngleDeg = 0; % Angle between x axis of the motor and the Galvo's x axis
 
-% Pattern to photobleach. System will photobleach n lines from 
-% (x_start(i), y_start(i)) to (x_end(i), y_end(i)) at height z
-% Load the pattern
-[x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = ...
-    generateXZPattern();
+% Define z stack and z-stitching
+scanZJump_um = 5; % microns. OBJECTIVE_DEPENDENT: For 10x use 15, for 40x use 5
+zToScan_mm = unique([-100 (-30:scanZJump_um:300), 0])*1e-3; %[mm]
+focusSigma = 10; % When stitching along Z axis (multiple focus points), what is the size of each focus in z [pixels]. OBJECTIVE_DEPENDENT: for 10x use 20, for 40x use 20 or 1
 
-% Photobleach configurations
+% Other scanning parameters
+tissueRefractiveIndex = 1.33; % Use either 1.33 or 1.4 depending on the results. Use 1.4 for brain.
+dispersionQuadraticTerm=-1.465e+08;  % 10x, OCTP900. This input is OBJECTIVE_DEPENDENT
+
+% Where to save scan files
+output_folder = '.\';
+
+% Set to true if you would like to process existing scan rather than scan a new one.
+skipHardware = false; % If true, skip real photobleaching and scanning
+
+% For all B-Scans, this parameter defines the depth (Z, pixels) that the focus is located at.
+% If set to NaN, yOCTFindFocusTilledScan will be executed to request user to select focus position.
+focusPositionInImageZpix = NaN;
+
+%% INPUTS [1/2] - Photobleach XZ Pattern
+% Hashtag Photobleach Configurations
 exposure_mm_sec = 5; % mm/sec
 nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
 
-%% Photobleach
+%% Execution [1/4] - Perform Low-Resolution Surface Identification Scans
+% Generate the Hashtag Photobleaching Pattern (for full area)
+[x_start_mm, x_end_mm, ...
+ y_start_mm, y_end_mm, ...
+ z_mm] = generateXZPattern();
+
+% Define X/Y ranges for surface detection. These determine the area scanned to map tissue topography 
+% for depth correction. Set ranges to fully cover the photobleaching pattern area
+x_raw = [min([x_start_mm x_end_mm]), max([x_start_mm x_end_mm])]; % find X raw min and max
+y_raw = [min([y_start_mm y_end_mm]), max([y_start_mm y_end_mm])]; % find Y raw min and max
+expandRange = @(rng,FOV) [rng(1), rng(1) + ceil(diff(rng)/FOV) * FOV]; % helper that keeps the first edge, expands the second
+% Final areas for low-resolution surface scans
+x_Surface_Detection_Range_mm = expandRange(x_raw, octProbeFOV_mm); % X Range e.g. [-1.25  1.25]
+y_Surface_Detection_Range_mm = expandRange(y_raw, octProbeFOV_mm); % Y Range e.g. [-1.25  1.25]
+
+%% Execution [1/4] - Perform Low-Resolution Surface Identification Scans
+fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', datestr(datetime));
+volumeOutputFolder = [output_folder '/OCTVolume/'];
+
+% Find focus if necessary
+if isnan(focusPositionInImageZpix) && ~skipHardware
+    % Quick scan to identify focus
+    yOCTScanTile (...
+        volumeOutputFolder, ...
+        xOverall_mm, ...
+        [-0.001, 0.001], ... Use a few slices to quickly identify focus
+        'octProbePath', octProbePath, ...
+        'tissueRefractiveIndex', tissueRefractiveIndex, ...
+        'octProbeFOV_mm', octProbeFOV_mm, ...
+        'pixelSize_um', 1, ...
+        'xOffset',   0, ...
+        'yOffset',   0, ...
+        'zDepths',   0.015, ... Focus 15 microns below interface to check easily
+        'oct2stageXYAngleDeg', oct2stageXYAngleDeg, ...
+        'v',true);
+        focusPositionInImageZpix = yOCTFindFocusTilledScan(volumeOutputFolder,...
+            'reconstructConfig',{'dispersionQuadraticTerm',dispersionQuadraticTerm},'verbose',true);
+end
+
+% Run surface identification scan
+[surfacePosition_mm, surfaceX_mm, surfaceY_mm] = yOCTScanAndFindTissueSurface( ...
+    'xRange_mm', x_Surface_Detection_Range_mm, ...
+    'yRange_mm', y_Surface_Detection_Range_mm, ...
+    'octProbeFOV_mm', octProbeFOV_mm, ...
+    'octProbePath', octProbePath, ...
+    'saveSurfaceMap', true, ...
+    'output_folder', output_folder, ...
+    'pixel_size_um', 10, ...
+    'focusPositionInImageZpix', focusPositionInImageZpix, ...
+    'dispersionQuadraticTerm', dispersionQuadraticTerm, ...
+    'v', false);
+
+% Wrap detected surface in a struct (neat, only one argument to pass)
+S.surfacePosition_mm = surfacePosition_mm;
+S.surfaceX_mm        = surfaceX_mm;
+S.surfaceY_mm        = surfaceY_mm;
+fprintf('%s [1/4] Surface Identification scans completed successfully.\n', datestr(datetime));
+
+%% Execution [2/4] - Perform Main OCT Scan
+% Perform the OCT Scan
+fprintf('%s [2/4] Performing Main OCT Scan...\n', datestr(datetime));
+fprintf('%s Scanning Volume\n',datestr(datetime));
+scanParameters = yOCTScanTile (...
+    volumeOutputFolder, ...
+    xOverall_mm, ...
+    yOverall_mm, ...
+    'octProbePath', octProbePath, ...
+    'tissueRefractiveIndex', tissueRefractiveIndex, ...
+    'octProbeFOV_mm', octProbeFOV_mm, ...
+    'pixelSize_um', pixel_size_um, ...
+    'xOffset',   0, ...
+    'yOffset',   0, ... 
+    'zDepths',   zToScan_mm, ... [mm]
+    'oct2stageXYAngleDeg', oct2stageXYAngleDeg, ...
+    'skipHardware',skipHardware, ...
+    'v',true  ...
+    );
+fprintf("[2/4] OCT Scan completed successfully.\n");
+
+%% Execution [3/4] Photobleach XZ Pattern
+fprintf('%s [3/4] Starting Photobleaching XZ Pattern\n', datestr(datetime));
 yOCTPhotobleachTile(...
     [x_start_mm; y_start_mm],...
     [x_end_mm; y_end_mm],...
@@ -32,13 +133,24 @@ yOCTPhotobleachTile(...
     'exposure',exposure_mm_sec,...
     'nPasses',nPasses,...
     'skipHardware',skipHardware, ...
+    'surfaceMap', S, ...
     'z',z_mm, ...
-    'maxLensFOV', 0.15, ... Artificially reduce FOV to make sure lines are not tilted during photobleach
+    'maxLensFOV', octProbeFOV_mm, ... Artificially reduce FOV to make sure lines are not tilted during photobleach
     'enableZoneAccuracy',1e-3,'enableZoneAccuracy',1e-3,... These arguments are needed for photobleaching the dots, comment out if no dotes are photobleached
     'plotPattern',true, ...
-    'v',true); 
-disp('Done Patterning')
+    'v',true);
+fprintf('%s Done Photobleaching XZ Pattern\n', datestr(datetime));
 
-%% OCT Volume Scan
-disp('To scan use Demo_ScanAndProcess_3D, running it now')
-Demo_ScanAndProcess_3D
+%% Main OCT Volume Reconstruction [4/4]
+% Reconstruct the z-stack 3d volume
+fprintf('%s Processing\n',datestr(datetime));
+outputTiffFile = [output_folder '/Image.tiff'];
+yOCTProcessTiledScan(...
+    volumeOutputFolder, ... Input
+    {outputTiffFile},... Save only Tiff file as folder will be generated after smoothing
+    'focusPositionInImageZpix', focusPositionInImageZpix,... No Z scan filtering
+    'focusSigma',focusSigma,...
+    'dispersionQuadraticTerm',dispersionQuadraticTerm,... Use default
+    'interpMethod','sinc5', ...
+    'v',true);
+fprintf("[4/4] OCT Reconstruction completed successfully.\n");
