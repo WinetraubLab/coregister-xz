@@ -88,8 +88,8 @@ if isnan(focusPositionInImageZpix) && ~skipHardware
         'zDepths',   0.015, ... Focus 15 microns below interface to check easily
         'oct2stageXYAngleDeg', oct2stageXYAngleDeg, ...
         'v',true);
-        focusPositionInImageZpix = yOCTFindFocusTilledScan(volumeOutputFolder,...
-            'reconstructConfig',{'dispersionQuadraticTerm',dispersionQuadraticTerm},'verbose',true);
+    focusPositionInImageZpix = yOCTFindFocusTilledScan(volumeOutputFolder,...
+        'reconstructConfig',{'dispersionQuadraticTerm',dispersionQuadraticTerm},'verbose',true);
 end
 
 % Run surface identification scan
