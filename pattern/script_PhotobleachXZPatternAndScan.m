@@ -29,15 +29,15 @@ focusSigma = 10; % When stitching along Z axis (multiple focus points), what is 
 % Other scanning parameters
 tissueRefractiveIndex = 1.33; % Use either 1.33 or 1.4 depending on the results. Use 1.4 for brain.
 
+% Hashtag Photobleach Configurations
+exposure_mm_sec = 5; % mm/sec
+nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
+
 % Where to save scan files
 outputFolder = '.\';
 
 % Set to true if you would like to process existing scan rather than scan a new one.
 skipHardware = false; % If true, skip real photobleaching and scanning
-
-% Hashtag Photobleach Configurations
-exposure_mm_sec = 5; % mm/sec
-nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
 
 %% Pre-processing
 
@@ -79,7 +79,10 @@ fprintf('%s [0/4] Performing Focus and Dispersion Identification Scans...\n', da
     yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
     'octProbePath',yOCTGetProbeIniPath('40x','OCTP900'), ...
     'tissueRefractiveIndex',tissueRefractiveIndex, ...
-    'skipHardware',skipScanning);
+    'skipHardware',skipScanning, ...
+    'v', false);
+fprintf('%s dispersionQuadraticTerm = %.3e; focusPositionInImageZpix=%d;\n', ...
+    datestr(datetime), dispersionQuadraticTerm, focusPositionInImageZpix);
 
 % Uncomment below to set manually
 % dispersionQuadraticTerm=-1.549e08;
@@ -105,7 +108,6 @@ fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', 
 S.surfacePosition_mm = surfacePosition_mm;
 S.surfaceX_mm        = surfaceX_mm;
 S.surfaceY_mm        = surfaceY_mm;
-fprintf('%s [1/4] Surface Identification scans completed successfully.\n', datestr(datetime));
 
 %% Execution [2/4] - Perform Main OCT Scan
 % Perform the OCT Scan
@@ -126,7 +128,6 @@ scanParameters = yOCTScanTile (...
     'skipHardware',skipHardware, ...
     'v',true  ...
     );
-fprintf("[2/4] OCT Scan completed successfully.\n");
 
 %% Execution [3/4] Photobleach XZ Pattern
 fprintf('%s [3/4] Starting Photobleaching XZ Pattern\n', datestr(datetime));
@@ -143,11 +144,11 @@ yOCTPhotobleachTile(...
     'enableZoneAccuracy',1e-3,'enableZoneAccuracy',1e-3,... These arguments are needed for photobleaching the dots, comment out if no dotes are photobleached
     'plotPattern',true, ...
     'v',true);
-fprintf('%s Done Photobleaching XZ Pattern\n', datestr(datetime));
 
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
-fprintf('%s Processing\n',datestr(datetime));
+fprintf('%s [3/4] Starting Reconstruction.\n', datestr(datetime));
+
 outputTiffFile = [outputFolder '/Image.tiff'];
 yOCTProcessTiledScan(...
     volumeOutputFolder, ... Input
@@ -157,4 +158,6 @@ yOCTProcessTiledScan(...
     'dispersionQuadraticTerm',dispersionQuadraticTerm,... Use default
     'interpMethod','sinc5', ...
     'v',true);
-fprintf("[4/4] OCT Reconstruction completed successfully.\n");
+
+%% Clean up
+fprintf('%s All done.\n', datestr(datetime));
