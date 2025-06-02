@@ -28,17 +28,12 @@ focusSigma = 10; % When stitching along Z axis (multiple focus points), what is 
 
 % Other scanning parameters
 tissueRefractiveIndex = 1.33; % Use either 1.33 or 1.4 depending on the results. Use 1.4 for brain.
-dispersionQuadraticTerm=-1.465e+08;  % 10x, OCTP900. This input is OBJECTIVE_DEPENDENT
 
 % Where to save scan files
 outputFolder = '.\';
 
 % Set to true if you would like to process existing scan rather than scan a new one.
 skipHardware = false; % If true, skip real photobleaching and scanning
-
-% For all B-Scans, this parameter defines the depth (Z, pixels) that the focus is located at.
-% If set to NaN, yOCTFindFocusTilledScan will be executed to request user to select focus position.
-focusPositionInImageZpix = NaN;
 
 % Hashtag Photobleach Configurations
 exposure_mm_sec = 5; % mm/sec
@@ -68,28 +63,30 @@ end
 [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
     getPatternBoundingBox(x_start_mm, x_end_mm, y_start_mm, y_end_mm, octProbeFOV_mm);
 
+%% Execution [0/4] - Identify focus and dispersion parameters
+
+% Check that sufficient ammount of gel is above the tissue for proper focus
+if (min(zToScan_mm)) > -100e-3
+    warning('Because we use gel above tissue to find focus position. It is important to have at least one of the z-stacks in the gel. Consider having the minimum zToScan_mm to be -100e-3[mm]')
+end
+
+fprintf('%s Please adjust the OCT focus such that it is precisely at the intersection of the tissue and the coverslip.\n', datestr(datetime));
+fprintf('%s [0/4] Performing Focus and Dispersion Identification Scans...\n', datestr(datetime));
+
+% Estimate dispersionQuadraticTerm and focusPositionInImageZpix using the
+% glass slide.
+[dispersionQuadraticTerm, focusPositionInImageZpix] = ...
+    yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
+    'octProbePath',yOCTGetProbeIniPath('40x','OCTP900'), ...
+    'tissueRefractiveIndex',tissueRefractiveIndex, ...
+    'skipHardware',skipScanning);
+
+% Uncomment below to set manually
+% dispersionQuadraticTerm=-1.549e08;
+% focusPositionInImageZpix = 200; 
+
 %% Execution [1/4] - Perform Low-Resolution Surface Identification Scans
 fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', datestr(datetime));
-
-% Find focus if necessary
-if isnan(focusPositionInImageZpix) && ~skipHardware
-    % Quick scan to identify focus
-    yOCTScanTile (...
-        volumeOutputFolder, ...
-        xOverall_mm, ...
-        [-0.001, 0.001], ... Use a few slices to quickly identify focus
-        'octProbePath', octProbePath, ...
-        'tissueRefractiveIndex', tissueRefractiveIndex, ...
-        'octProbeFOV_mm', octProbeFOV_mm, ...
-        'pixelSize_um', 1, ...
-        'xOffset',   0, ...
-        'yOffset',   0, ...
-        'zDepths',   0.015, ... Focus 15 microns below interface to check easily
-        'oct2stageXYAngleDeg', oct2stageXYAngleDeg, ...
-        'v',true);
-    focusPositionInImageZpix = yOCTFindFocusTilledScan(volumeOutputFolder,...
-        'reconstructConfig',{'dispersionQuadraticTerm',dispersionQuadraticTerm},'verbose',true);
-end
 
 % Run surface identification scan
 [surfacePosition_mm, surfaceX_mm, surfaceY_mm] = yOCTScanAndFindTissueSurface( ...
