@@ -51,7 +51,6 @@ volumeOutputFolder = [outputFolder '/OCTVolume/'];
 % Generate the Hashtag Photobleaching Pattern (for full area)
 [x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = generateXZPattern();
 
-
 % Get the bounding box of the XZ pattern.
 function [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
     getPatternBoundingBox(x_start_mm, x_end_mm, y_start_mm, y_end_mm, octProbeFOV_mm)
