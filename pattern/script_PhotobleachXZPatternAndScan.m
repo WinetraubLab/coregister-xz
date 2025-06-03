@@ -146,7 +146,7 @@ yOCTPhotobleachTile(...
 
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
-fprintf('%s [3/4] Starting Reconstruction.\n', datestr(datetime));
+fprintf('%s [4/4] Starting Reconstruction.\n', datestr(datetime));
 
 outputTiffFile = [outputFolder '/Image.tiff'];
 if ~skipHardware
