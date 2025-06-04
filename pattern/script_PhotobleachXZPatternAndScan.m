@@ -30,7 +30,7 @@ focusSigma = 10; % When stitching along Z axis (multiple focus points), what is 
 tissueRefractiveIndex = 1.33; % Use either 1.33 or 1.4 depending on the results. Use 1.4 for brain.
 
 % Hashtag Photobleach Configurations
-exposure_mm_sec = 5; % mm/sec
+exposure_mm_sec = 3; % mm/sec
 nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
 
 % Where to save scan files
