@@ -47,19 +47,6 @@ volumeOutputFolder = [outputFolder '/OCTVolume/'];
 [x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = generateXZPattern();
 
 % Get the bounding box of the XZ pattern.
-function [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
-    getPatternBoundingBox(x_start_mm, x_end_mm, y_start_mm, y_end_mm, octProbeFOV_mm)
-
-    % Define X/Y ranges for surface detection. These determine the area scanned to map tissue topography 
-    % for depth correction. Set ranges to fully cover the photobleaching pattern area
-    x_raw = [min([x_start_mm x_end_mm]), max([x_start_mm x_end_mm])]; % find X raw min and max
-    y_raw = [min([y_start_mm y_end_mm]), max([y_start_mm y_end_mm])]; % find Y raw min and max
-    expandRange = @(rng,FOV) [rng(1), rng(1) + ceil(diff(rng)/FOV) * FOV]; % helper that keeps the first edge, expands the second
-    
-    % Final areas for low-resolution surface scans
-    xPhotobleachPatternBoundingBox = expandRange(x_raw, octProbeFOV_mm); % X Range e.g. [-1.25  1.25]
-    yPhotobleachPatternBoundingBox = expandRange(y_raw, octProbeFOV_mm); % Y Range e.g. [-1.25  1.25]
-end
 [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
     getPatternBoundingBox(x_start_mm, x_end_mm, y_start_mm, y_end_mm, octProbeFOV_mm);
 
@@ -75,24 +62,33 @@ fprintf('%s [0/4] Performing Focus and Dispersion Identification Scans...\n', da
 
 % Estimate dispersionQuadraticTerm and focusPositionInImageZpix using the
 % glass slide.
-[dispersionQuadraticTerm, focusPositionInImageZpix] = ...
-    yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
-    'octProbePath',yOCTGetProbeIniPath('40x','OCTP900'), ...
-    'tissueRefractiveIndex',tissueRefractiveIndex, ...
-    'skipHardware',skipScanning, ...
-    'v', false);
-fprintf('%s dispersionQuadraticTerm = %.3e; focusPositionInImageZpix=%d;\n', ...
-    datestr(datetime), dispersionQuadraticTerm, focusPositionInImageZpix);
+if ~skipHardware
+    [dispersionQuadraticTerm, focusPositionInImageZpix] = ...
+        yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
+        'octProbePath', yOCTGetProbeIniPath('40x','OCTP900'), ...
+        'tissueRefractiveIndex', tissueRefractiveIndex, ...
+        'skipHardware', skipHardware, ...
+        'v', false);
+    fprintf('%s dispersionQuadraticTerm = %.3e; focusPositionInImageZpix=%d;\n', ...
+        datestr(datetime), dispersionQuadraticTerm, focusPositionInImageZpix);
+end
 
 % Uncomment below to set manually
 % dispersionQuadraticTerm=-1.549e08;
-% focusPositionInImageZpix = 200; 
+% focusPositionInImageZpix = 200;
 
 %% Execution [1/4] - Perform Low-Resolution Surface Identification Scans
 fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', datestr(datetime));
 
+% Get our Regon Of Interest box [x y width, height] to test focus
+x0 = min(xOverall_mm);        % left edge
+y0 = min(yOverall_mm);        % bottom edge
+w  = abs(diff(xOverall_mm));  % width
+h  = abs(diff(yOverall_mm));  % height
+roiToCheckSurfacePosition = [x0, y0, w, h];
+
 % Run surface identification scan
-[surfacePosition_mm, surfaceX_mm, surfaceY_mm] = yOCTScanAndFindTissueSurface( ...
+[surfacePosition_mm, surfaceX_mm, surfaceY_mm] = yOCTScanTissueSurfaceAndAutoAdjustFocusViaZStage( ...
     'xRange_mm', xPhotobleachPatternBoundingBox, ...
     'yRange_mm', yPhotobleachPatternBoundingBox, ...
     'octProbeFOV_mm', octProbeFOV_mm, ...
@@ -101,7 +97,8 @@ fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', 
     'skipHardware', skipHardware,...
     'focusPositionInImageZpix', focusPositionInImageZpix, ...
     'dispersionQuadraticTerm', dispersionQuadraticTerm, ...
-    'v', false);
+    'roiToCheckSurfacePosition', roiToCheckSurfacePosition, ...
+    'v', true);
 
 % Wrap detected surface in a struct (neat, only one argument to pass)
 S.surfacePosition_mm = surfacePosition_mm;
@@ -160,5 +157,21 @@ if ~skipHardware
         'interpMethod','sinc5', ...
         'v',true);
 end
-%% Clean up
+
+% Clean up
 fprintf('%s All done.\n', datestr(datetime));
+
+%% Helper function
+function [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
+    getPatternBoundingBox(x_start_mm, x_end_mm, y_start_mm, y_end_mm, octProbeFOV_mm)
+
+    % Define X/Y ranges for surface detection. These determine the area scanned to map tissue topography 
+    % for depth correction. Set ranges to fully cover the photobleaching pattern area
+    x_raw = [min([x_start_mm x_end_mm]), max([x_start_mm x_end_mm])]; % find X raw min and max
+    y_raw = [min([y_start_mm y_end_mm]), max([y_start_mm y_end_mm])]; % find Y raw min and max
+    expandRange = @(rng,FOV) [rng(1), rng(1) + ceil(diff(rng)/FOV) * FOV]; % helper that keeps the first edge, expands the second
+    
+    % Final areas for low-resolution surface scans
+    xPhotobleachPatternBoundingBox = expandRange(x_raw, octProbeFOV_mm); % X Range e.g. [-1.25  1.25]
+    yPhotobleachPatternBoundingBox = expandRange(y_raw, octProbeFOV_mm); % Y Range e.g. [-1.25  1.25]
+end
