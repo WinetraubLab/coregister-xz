@@ -151,7 +151,8 @@ json = yOCTPhotobleachTile(...
             'maxLensFOV', 0.4 , ... mm Artificially reduce FOV to make sure lines are not tilted during photobleach
             'enableZoneAccuracy',1e-3,'enableZoneAccuracy',1e-3,... These arguments are needed for photobleaching the dots, comment out if no dotes are photobleached
             'plotPattern',true, ...
-            'v',true);
+            'v',true,...
+            'surfaceCorrectionMode', 1);
 
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
