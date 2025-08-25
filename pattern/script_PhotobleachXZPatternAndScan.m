@@ -40,7 +40,7 @@ outputFolder = '.\';
 skipHardware = false; % If true, skip real photobleaching and scanning
 
 % How to apply Z correction from surface detection scan
-surfaceCorrectionMode = 'per-tile'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
+surfaceCorrectionMode = 'origin-tile'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
 
 %% Pre-processing
 volumeOutputFolder = [outputFolder '/OCTVolume/'];
