@@ -1,3 +1,5 @@
+%% ESTE LO USE PARA PHOTOBLEACH LINES EN DEMIS 8.29
+
 % Run this script to use Thorlabs system to scan a 3D OCT Volume and
 % photobleach a given XZ pattern.
 % This script performs:  
@@ -28,10 +30,6 @@ focusSigma = 10; % When stitching along Z axis (multiple focus points), what is 
 % Other scanning parameters
 tissueRefractiveIndex = 1.33; % Use either 1.33 or 1.4 depending on the results. Use 1.4 for brain.
 
-% Hashtag Photobleach Configurations
-exposure_mm_sec = 2; % mm/sec
-nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
-
 % Where to save scan files
 outputFolder = '.\';
 
@@ -39,13 +37,30 @@ outputFolder = '.\';
 skipHardware = true; % If true, skip real photobleaching and scanning
 
 % How to apply Z correction from surface detection scan
-surfaceCorrectionMode = 'origin-tile'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
+surfaceCorrectionMode = 'none'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
 
 %% Pre-processing
 volumeOutputFolder = [outputFolder '/OCTVolume/'];
 
 % Generate the Hashtag Photobleaching Pattern (for full area)
 [x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = generateXZPattern();
+
+% Hashtag Photobleach Configurations
+exposure_mm_sec = 5; % mm/sec
+nPasses = 4; % Keep as low as possible. If galvo gets stuck, increase number
+
+% XY
+centerX = 0.0; centerY = 0.0; includeBorders = true;
+[x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = generateXZSlabSingle( ...
+    0.5, ...   % L_sq_mm (mm)
+    0.02, ...   % pitch_mm (mm) -> 40 µm
+    (0:30:160)/1000, ... % z_list_mm (mm): 0.03 a 0.18
+    centerX, centerY, ...
+    'v', includeBorders);
+
+[x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = generateXZSlabSingle( ...
+    0.5, 0.02, (0:30:160)/1000, centerX, centerY, 'v', includeBorders);
+
 
 % Get the bounding box of the XZ pattern.
 function [xPhotobleachPatternBoundingBox, yPhotobleachPatternBoundingBox] = ...
@@ -76,19 +91,19 @@ fprintf('%s [0/4] Performing Focus and Dispersion Identification Scans...\n', da
 
 % Estimate dispersionQuadraticTerm and focusPositionInImageZpix using the
 % glass slide.
-if ~skipHardware
-    [dispersionQuadraticTerm, focusPositionInImageZpix] = ...
-        yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
-        'octProbePath', yOCTGetProbeIniPath('40x','OCTP900'), ...
-        'tissueRefractiveIndex', tissueRefractiveIndex, ...
-        'v', false);
-    fprintf('%s dispersionQuadraticTerm = %.3e; focusPositionInImageZpix=%d;\n', ...
-        datestr(datetime), dispersionQuadraticTerm, focusPositionInImageZpix);
-end
+% if ~skipHardware
+%     [dispersionQuadraticTerm, focusPositionInImageZpix] = ...
+%         yOCTScanGlassSlideToFindFocusAndDispersionQuadraticTerm( ...
+%         'octProbePath', yOCTGetProbeIniPath('40x','OCTP900'), ...
+%         'tissueRefractiveIndex', tissueRefractiveIndex, ...
+%         'v', false);
+%     fprintf('%s dispersionQuadraticTerm = %.3e; focusPositionInImageZpix=%d;\n', ...
+%         datestr(datetime), dispersionQuadraticTerm, focusPositionInImageZpix);
+% end
 
 % Uncomment below to set manually
-dispersionQuadraticTerm=-1.549e08;
-focusPositionInImageZpix = 200;
+dispersionQuadraticTerm  = -1.487424070517952e+08;
+focusPositionInImageZpix = 447;
 
 %% Execution [1/4] - Perform Low-Resolution Surface Identification Scans
 fprintf('%s [1/4] Performing Low-Resolution Surface Identification Scans...\n', datestr(datetime));
@@ -125,20 +140,20 @@ S.surfaceY_mm        = surfaceY_mm;
 % Perform the OCT Scan
 fprintf('%s [2/4] Performing Main OCT Scan...\n', datestr(datetime));
 fprintf('%s Scanning Volume\n',datestr(datetime));
-scanParameters = yOCTScanTile (...
-    volumeOutputFolder, ...
-    xOverall_mm, ...
-    yOverall_mm, ...
-    'octProbePath', octProbePath, ...
-    'tissueRefractiveIndex', tissueRefractiveIndex, ...
-    'octProbeFOV_mm', octProbeFOV_mm, ...
-    'pixelSize_um', pixelSize_um, ...
-    'xOffset',   0, ...
-    'yOffset',   0, ... 
-    'zDepths',   zToScan_mm, ... [mm]
-    'skipHardware',skipHardware, ...
-    'v',true  ...
-    );
+% scanParameters = yOCTScanTile (...
+%     volumeOutputFolder, ...
+%     xOverall_mm, ...
+%     yOverall_mm, ...
+%     'octProbePath', octProbePath, ...
+%     'tissueRefractiveIndex', tissueRefractiveIndex, ...
+%     'octProbeFOV_mm', octProbeFOV_mm, ...
+%     'pixelSize_um', pixelSize_um, ...
+%     'xOffset',   0, ...
+%     'yOffset',   0, ... 
+%     'zDepths',   zToScan_mm, ... [mm]
+%     'skipHardware',skipHardware, ...
+%     'v',true  ...
+%     );
 
 %% Execution [3/4] Photobleach XZ Pattern
 fprintf('%s [3/4] Starting Photobleaching XZ Pattern\n', datestr(datetime));
@@ -157,22 +172,56 @@ json = yOCTPhotobleachTile(...
             'v',true,...
             'surfaceCorrectionMode', surfaceCorrectionMode);
 
+function [x_start_mm, x_end_mm, y_start_mm, y_end_mm, z_mm] = ...
+    generateXZCross(L_sq_mm, z_list_mm, centerX_mm, centerY_mm)
+
+    half   = L_sq_mm/2;
+    x_left = centerX_mm - half;  x_right = centerX_mm + half;
+    y_top  = centerY_mm - half;  y_bot   = centerY_mm + half;
+
+    % Línea vertical (X fijo, Y recorre de top a bottom)
+    xv = centerX_mm;
+    yv0 = y_top;  yv1 = y_bot;
+
+    % Línea horizontal (Y fijo, X recorre de left a right)
+    yh = centerY_mm;
+    xh0 = x_left; xh1 = x_right;
+
+    % Empaquetar en vectores (2 líneas)
+    x_start_mm = [xv,   xh0];
+    x_end_mm   = [xv,   xh1];
+    y_start_mm = [yv0,  yh];
+    y_end_mm   = [yv1,  yh];
+
+    % Asignar z (cíclico si es vector)
+    nLines = numel(x_start_mm);
+    if isscalar(z_list_mm)
+        z_mm = z_list_mm * ones(1, nLines);
+    else
+        z_mm = zeros(1, nLines);
+        for i = 1:nLines
+            z_mm(i) = z_list_mm(1 + mod(i-1, numel(z_list_mm)));
+        end
+    end
+end
+
+
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
-fprintf('%s [4/4] Starting Reconstruction.\n', datestr(datetime));
+% fprintf('%s [4/4] Starting Reconstruction.\n', datestr(datetime));
 
 outputTiffFile = [outputFolder '/Image.tiff'];
-if ~skipHardware
-    yOCTProcessTiledScan(...
-        volumeOutputFolder, ... Input
-        {outputTiffFile},... Save only Tiff file as folder will be generated after smoothing
-        'focusPositionInImageZpix', focusPositionInImageZpix,... No Z scan filtering
-        'focusSigma',focusSigma,...
-        'outputFilePixelSize_um', pixelSize_um,...
-        'dispersionQuadraticTerm',dispersionQuadraticTerm,... Use default
-        'interpMethod','sinc5', ...
-        'v',true);
-end
+% if ~skipHardware
+%     yOCTProcessTiledScan(...
+%         volumeOutputFolder, ... Input
+%         {outputTiffFile},... Save only Tiff file as folder will be generated after smoothing
+%         'focusPositionInImageZpix', focusPositionInImageZpix,... No Z scan filtering
+%         'focusSigma',focusSigma,...
+%         'outputFilePixelSize_um', pixelSize_um,...
+%         'dispersionQuadraticTerm',dispersionQuadraticTerm,... Use default
+%         'interpMethod','sinc5', ...
+%         'v',true);
+% end
 
 %% Clean up
 fprintf('%s All done.\n', datestr(datetime));
