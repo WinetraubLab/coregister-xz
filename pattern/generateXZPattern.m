@@ -24,6 +24,8 @@ yStart_mm=[];
 yEnd_mm =[];
 z_mm = [];
 
+txtPos_mm = []; % Position of the text for printing
+
 %% Build
 
 line_n = 0;
@@ -55,7 +57,13 @@ z_mm = [z_mm(:)', z0_mm+00e-3];
 figure(1)
 for ii=1:length(xStart_mm)
     plot([xStart_mm(ii), xEnd_mm(ii)], [yStart_mm(ii), yEnd_mm(ii)]);
-    hold on;
+    if ii==1
+        hold on;
+    end
+end
+for ii=1:size(txtPos_mm,1)
+    text(txtPos_mm(ii,1),txtPos_mm(ii,2),sprintf('%d',ii-1),...
+        'HorizontalAlignment','center',VerticalAlignment='middle');
 end
 plot(0.25*[-1 1 1 -1 -1], 0.25*[-1 -1 1 1 -1], 'k-', 'LineWidth', 2);
 hold off
@@ -95,13 +103,6 @@ function generateZ(x0_mm, y0s_mm, z0_mm, isApplyLensYZone, L_mm)
     yStart1_mm = [yMin, dStartY_mm(:)', yMin];
     yEnd1_mm   = [yMax, dEndY_mm(:)'  , yMax];
     z1_mm = ones(size(xStart1_mm))*z0_mm;
-    
-    % Print the line spec
-    for i=1:length(y0s_mm)
-        fprintf("%d: {'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
-            line_n, L_mm,D_mm,x0_mm,y0s_mm(i),z0_mm)
-        line_n = line_n+1;
-    end
 
     % Apply zone
     if isApplyLensYZone
@@ -113,6 +114,17 @@ function generateZ(x0_mm, y0s_mm, z0_mm, isApplyLensYZone, L_mm)
         yStart1_mm = ptStart(2,:);
         xEnd1_mm = ptEnd(1,:);
         yEnd1_mm = ptEnd(2,:);
+    end
+
+    % Print the line spec & add a text for it
+    for i=1:length(y0s_mm)
+        fprintf("%d: {'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
+            line_n, L_mm,D_mm,x0_mm,y0s_mm(i),z0_mm)
+        
+        txtPos_mm = [txtPos_mm; ...
+            mean([leftLine_x rightLine_x]), mean([dStartY_mm(i) dEndY_mm(i)])];
+
+        line_n = line_n+1;
     end
     
     % Append to lines
