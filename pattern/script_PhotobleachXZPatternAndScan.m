@@ -23,6 +23,7 @@ octProbeFOV_mm = 0.5; % How much of the field of view to use from the probe. OBJ
 % Define z stack and z-stitching
 scanZJump_um = 5; % microns. OBJECTIVE_DEPENDENT: For 10x use 15, for 40x use 5
 zToScan_mm = unique([-100 (-30:scanZJump_um:300), 0])*1e-3; %[mm]
+cropZRange_mm = [min(zToScan_mm) max(zToScan_mm)]; % [mm] Crop output Z range: from above to below tissue surface. Set to [] to keep the full scan range without cropping.
 focusSigma = 10; % When stitching along Z axis (multiple focus points), what is the size of each focus in z [pixels]. OBJECTIVE_DEPENDENT: for 10x use 20, for 40x use 20 or 1
 
 % Other scanning parameters
@@ -168,6 +169,7 @@ if ~skipHardware
         {outputTiffFile},... Save only Tiff file as folder will be generated after smoothing
         'focusPositionInImageZpix', focusPositionInImageZpix,... No Z scan filtering
         'focusSigma',focusSigma,...
+        'cropZRange_mm',cropZRange_mm,...
         'outputFilePixelSize_um', pixelSize_um,...
         'dispersionQuadraticTerm',dispersionQuadraticTerm,... Use default
         'interpMethod','sinc5', ...
