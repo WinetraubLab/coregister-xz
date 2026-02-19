@@ -11,6 +11,8 @@
 
 %% INPUTS
 
+octSystem = 'Ganymede'; % Use either 'Ganymede' or 'Gan632' depending on your OCT system
+
 % Define the 3D Volume
 pixelSize_um = 1; % x-y Pixel size in microns
 xOverall_mm = [-0.25 0.25]; % Define the overall volume you would like to scan [start, finish]. OBJECTIVE_DEPENDENT: For 10x use [-0.5 0.5], for 40x use [-0.25 0.25]
@@ -41,6 +43,9 @@ skipHardware = false; % If true, skip real photobleaching and scanning
 
 % How to apply Z correction from surface detection scan
 surfaceCorrectionMode = 'origin-tile'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
+
+%% Load hardware
+yOCTHardwareLibSetUp(octSystem, skipHardware, true);
 
 %% Pre-processing
 volumeOutputFolder = [outputFolder '/OCTVolume/'];
@@ -157,6 +162,9 @@ json = yOCTPhotobleachTile(...
             'plotPattern',true, ...
             'v',true,...
             'surfaceCorrectionMode', surfaceCorrectionMode);
+
+%% Cleanup for next run
+yOCTHardwareLibTearDown(true);
 
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
