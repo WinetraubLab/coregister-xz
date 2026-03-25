@@ -44,7 +44,8 @@ skipHardware = false; % If true, skip real photobleaching and scanning
 surfaceCorrectionMode = 'origin-tile'; % Use 'per-tile' for best offset per tile/lens FOV, 'origin-tile' to use origin offset tile for all, or 'none' for no correction
 
 %% Load hardware
-yOCTHardwareLibSetUp(octSystem, skipHardware, true);
+yOCTHardware('init', 'OCTSystem', octSystem, 'skipHardware', skipHardware, ...
+    'octProbePath', octProbePath, 'v', true, 'autoCleanup', true);
 
 %% Pre-processing
 volumeOutputFolder = [outputFolder '/OCTVolume/'];
@@ -159,7 +160,7 @@ json = yOCTPhotobleachTile(...
             'surfaceCorrectionMode', surfaceCorrectionMode);
 
 %% Cleanup for next run
-yOCTHardwareLibTearDown(true);
+yOCTHardware('teardown');
 
 %% Main OCT Volume Reconstruction [4/4]
 % Reconstruct the z-stack 3d volume
