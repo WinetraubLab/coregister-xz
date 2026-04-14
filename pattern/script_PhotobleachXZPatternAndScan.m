@@ -45,7 +45,7 @@ surfaceCorrectionMode = 'origin-tile'; % Use 'per-tile' for best offset per tile
 
 %% Load hardware
 yOCTHardware('init', 'OCTSystem', octSystem, 'skipHardware', skipHardware, ...
-    'octProbePath', octProbePath, 'v', true, 'autoCleanup', true);
+    'octProbePath', octProbePath, 'v', true);
 
 %% Pre-processing
 volumeOutputFolder = [outputFolder '/OCTVolume/'];
