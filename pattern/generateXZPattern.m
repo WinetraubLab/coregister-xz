@@ -10,7 +10,7 @@ function [...
 
 %% Parameters
 L_mm = 0.300;
-D_mm = 0.150;
+D_mm = 0.20;
 z0_mm = 40e-3; % [mm], how deep to draw pattern compared to the surface.
 lensFOV_mm = 0.4;
 
@@ -30,20 +30,20 @@ txtPos_mm = []; % Position of the text for printing
 
 line_n = 0;
 
-generateZ(-2*lensFOV_mm, -0.4:0.3:0.1, z0_mm + 0.000, false, L_mm*2);
+generateZ(-0.825, -0.4:0.3:0.1, [z0_mm+0.000, z0_mm+0.000, z0_mm+0.000], false, L_mm*2);
 %generateEdgePattern(-2*lensFOV_mm, -0.4:0.3:0.7, z0_mm + 0.075, false, L_mm);
 
-generateZ(-1*lensFOV_mm, -0.3:0.15:0.1, z0_mm + 0.025, true, L_mm);
+generateZ(-0.575, -0.3:0.15:0.1, [z0_mm + 0.025, z0_mm + 0.025, z0_mm + 0.000], true, L_mm);
 %generateEdgePattern(-1.2*lensFOV_mm, -0.4:0.2:0.1, z0_mm + 0.050, true);
 
-generateZ(-D_mm/2, -0.3:0.15:0.1, z0_mm + 0.000, true, L_mm);
+generateZ(-D_mm/2, -0.3:0.15:0.1, [z0_mm, z0_mm+0.025, z0_mm+0.025], true, L_mm);
 xStart_mm(end)=[];xEnd_mm(end)=[];yStart_mm(end)=[];yEnd_mm(end)=[];z_mm(end)=[]; % Remove right most line
 generateZ(+D_mm/2, -0.25:0.15:0.1, z0_mm + 0.000, true, L_mm);
 
-generateZ(+1*lensFOV_mm, -0.3:0.15:0.1, z0_mm + 0.025, true, L_mm);
+generateZ(0.575, -0.3:0.15:0.1, [z0_mm + 0.000, z0_mm + 0.025, z0_mm + 0.025], true, L_mm);
 %generateEdgePattern(+1.2*lensFOV_mm, -0.4:0.2:0.1, z0_mm + 0.050, true);
-
-generateZ(+2*lensFOV_mm, -0.4:0.3:0.1, z0_mm + 0.000, false, L_mm*2);
+ 
+generateZ(0.825, -0.4:0.3:0.1, [z0_mm+0.000, z0_mm+0.000, z0_mm+0.000], false, L_mm*2);
 %generateEdgePattern(+2*lensFOV_mm, -0.4:0.3:0.7, z0_mm + 0.075, false, L_mm);
 
 %% Horizontal
@@ -62,8 +62,12 @@ for ii=1:length(xStart_mm)
     end
 end
 for ii=1:size(txtPos_mm,1)
-    text(txtPos_mm(ii,1),txtPos_mm(ii,2),sprintf('%d',ii-1),...
-        'HorizontalAlignment','center',VerticalAlignment='middle');
+    % text(txtPos_mm(ii,1),txtPos_mm(ii,2),sprintf('%d',ii-1),...
+    %     'HorizontalAlignment','center',VerticalAlignment='middle');
+    text(txtPos_mm(ii,1), txtPos_mm(ii,2), sprintf('%d', ii-1), ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'FontSize', 6);
 end
 plot(0.25*[-1 1 1 -1 -1], 0.25*[-1 -1 1 1 -1], 'k-', 'LineWidth', 2);
 hold off
@@ -102,7 +106,39 @@ function generateZ(x0_mm, y0s_mm, z0_mm, isApplyLensYZone, L_mm)
     xEnd1_mm   = [leftLine_x, dEndX_mm(:)'  , rightLine_x];
     yStart1_mm = [yMin, dStartY_mm(:)', yMin];
     yEnd1_mm   = [yMax, dEndY_mm(:)'  , yMax];
-    z1_mm = ones(size(xStart1_mm))*z0_mm;
+    if isscalar(z0_mm)
+        zLeftRail_mm = z0_mm;
+        zRightRail_mm = z0_mm;
+        zDiag_mm = ones(size(y0s_mm)) * z0_mm;
+    elseif numel(z0_mm) == 3
+        % [left rail, right rail, all diagonals]
+        zLeftRail_mm = z0_mm(1);
+        zDiag_mm = z0_mm(2);
+        zRightRail_mm = ones(size(y0s_mm)) * z0_mm(3);
+    elseif numel(z0_mm) == numel(y0s_mm)
+        % Backward-compatible mode: one depth per diagonal, rails inherit edges.
+        zDiag_mm = reshape(z0_mm, size(y0s_mm));
+        zLeftRail_mm = zDiag_mm(1);
+        zRightRail_mm = zDiag_mm(end);
+    else
+        error('generateZ:badDepthInput', ...
+            ['z0_mm must be scalar, a 3-vector [left,right,diag], ' ...
+             'or a vector matching the number of y0s_mm values.']);
+    end
+
+    
+    % Normalize shapes for robust indexing regardless of row/column inputs.
+    y0s_vec = y0s_mm(:)';
+    zDiag_vec = zDiag_mm(:)';
+    if numel(zDiag_vec) == 1 && numel(y0s_vec) > 1
+        zDiag_vec = repmat(zDiag_vec, 1, numel(y0s_vec));
+    end
+    dStartX_vec = dStartX_mm(:)';
+    dStartY_vec = dStartY_mm(:)';
+    dEndX_vec = dEndX_mm(:)';
+    dEndY_vec = dEndY_mm(:)';
+
+    z1_mm = [zLeftRail_mm, zDiag_mm(:)', zRightRail_mm];
 
     % Apply zone
     if isApplyLensYZone
@@ -116,24 +152,41 @@ function generateZ(x0_mm, y0s_mm, z0_mm, isApplyLensYZone, L_mm)
         yEnd1_mm = ptEnd(2,:);
     end
 
-    % Print the line spec & add a text for it
-    for i=1:length(y0s_mm)
-        fprintf("%d: {'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
-            line_n, L_mm,D_mm,x0_mm,y0s_mm(i),z0_mm)
-        
-        txtPos_mm = [txtPos_mm; ...
-            mean([leftLine_x rightLine_x]), mean([dStartY_mm(i) dEndY_mm(i)])];
+    % Print specs and add text labels for every generated line segment.
+    % Left rail
+    line_id = int32(line_n);
+    z_left = zLeftRail_mm(1);
+    fprintf("%d: {'line_type':'left_rail', 'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
+        line_id, L_mm, D_mm, x0_mm, yMin, z_left);
+    txtPos_mm = [txtPos_mm; leftLine_x, mean([yMin yMax])];
+    line_n = line_n+1;
 
+    % Diagonals
+    for i=1:numel(y0s_vec)
+        line_id = int32(line_n);
+        z_diag = zDiag_vec(i);
+        fprintf("%d: {'line_type':'diag', 'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
+            line_id, L_mm, D_mm, x0_mm, y0s_vec(i), z_diag);
+        txtPos_mm = [txtPos_mm; ...
+            mean([dStartX_vec(i) dEndX_vec(i)]), mean([dStartY_vec(i) dEndY_vec(i)])];
         line_n = line_n+1;
     end
-    
+
+    % Right rail
+    line_id = int32(line_n);
+    z_right = zRightRail_mm(1);
+    fprintf("%d: {'line_type':'right_rail', 'L_mm':%.3f, 'D_mm':%.3f, 'x_offset_mm':%.3f, 'y_offset_mm':%.3f, 'z_mm':%.3f},\n",...
+        line_id, L_mm, D_mm, x0_mm, yMin, z_right);
+    txtPos_mm = [txtPos_mm; rightLine_x, mean([yMin yMax])];
+    line_n = line_n+1;
+
     % Append to lines
     xStart_mm = [xStart_mm(:)' xStart1_mm(:)'];
     xEnd_mm   = [xEnd_mm(:)'   xEnd1_mm(:)'];
     yStart_mm = [yStart_mm(:)' yStart1_mm(:)'];
     yEnd_mm   = [yEnd_mm(:)'   yEnd1_mm(:)'];
     z_mm   = [z_mm(:)' z1_mm(:)'];
-    end
+end
 
 % This helper function generates a || that helps locate which pattern
 % are we on
