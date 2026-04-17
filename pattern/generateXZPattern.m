@@ -30,11 +30,14 @@ txtPos_mm = []; % Position of the text for printing
 
 line_n = 0;
 
-generateZ(-0.825, -0.4:0.3:0.1, [z0_mm+0.000, z0_mm+0.000, z0_mm+0.000], false, L_mm*2);
+% Test different focal depths
+
+generateZ(-0.825, -0.4:0.3:0.1, [0.07, 0.05, 0.03], false, L_mm*2);
 %generateEdgePattern(-2*lensFOV_mm, -0.4:0.3:0.7, z0_mm + 0.075, false, L_mm);
 
-generateZ(-0.575, -0.3:0.15:0.1, [z0_mm + 0.025, z0_mm + 0.025, z0_mm + 0.000], true, L_mm);
+generateZ(-0.575, -0.4, [0.08, 0.09, 0.10], true, L_mm*3);
 %generateEdgePattern(-1.2*lensFOV_mm, -0.4:0.2:0.1, z0_mm + 0.050, true);
+
 
 generateZ(-D_mm/2, -0.3:0.15:0.1, [z0_mm, z0_mm+0.025, z0_mm+0.025], true, L_mm);
 xStart_mm(end)=[];xEnd_mm(end)=[];yStart_mm(end)=[];yEnd_mm(end)=[];z_mm(end)=[]; % Remove right most line
