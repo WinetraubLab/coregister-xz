@@ -37,9 +37,9 @@ generateZ(-0.575, -0.4, [0.08, 0.09, 0.10], true, L_mm*3, false);
 generateZ(-D_mm/2, -0.3:0.15:0.1, [z0_mm, z0_mm+0.025, z0_mm+0.025], true, L_mm, false);
 generateZ(+D_mm/2, -0.25:0.15:0.1, z0_mm + 0.000, true, L_mm, true);
 
-generateZ(0.575, -0.3:0.15:0.1, [z0_mm + 0.000, z0_mm + 0.025, z0_mm + 0.025], true, L_mm, false);
+generateZ(0.51, -0.3:0.15:0.1, [z0_mm + 0.000, z0_mm + 0.025, z0_mm + 0.025], true, L_mm, false);
  
-generateZ(0.825, -0.4:0.3:0.1, [z0_mm+0.000, z0_mm+0.000, z0_mm+0.000], false, L_mm*2, false);
+generateZ(0.9, -0.4:0.3:0.1, [z0_mm+0.000, z0_mm+0.000, z0_mm+0.000], false, L_mm*2, false);
 
 %% Horizontal
 xStart_mm = [xStart_mm(:)', -1.25];
