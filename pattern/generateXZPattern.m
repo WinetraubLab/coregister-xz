@@ -8,55 +8,64 @@ allLines = {};
 % VerticalLine(x, yStart, yEnd, depth)
 % DiagonalLine(xStart, xEnd, yStart, yEnd, depth)
 
-allLines{end+1} = VerticalLine(-1, 0.5, -0.5, 65e-3);
-allLines{end+1} = VerticalLine(-0.92, 0.5, -0.5, 40e-3);
+allLines{end+1} = VerticalLine(-0.9, 0.5, -0.5, 65e-3);
+allLines{end+1} = DiagonalLine(-0.88, -0.77, -0.5, 0.5, 65e-3);
+allLines{end+1} = VerticalLine(-0.75, 0.5, -0.5, 40e-3);
 
-allLines{end+1} = VerticalLine(-0.7, -0.375, 0.375, 40e-3);
-allLines{end+1} = DiagonalLine(-0.67, -0.53, 0.37, -0.37, 65e-3);
-allLines{end+1} = VerticalLine(-0.5, -0.375, 0.375, 65e-3);
+% center left:
+allLines{end+1} = VerticalLine(-0.525, -0.375, 0.375, 40e-3); % longer
+allLines{end+1} = DiagonalLine(-0.5, -0.36, 0.02, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-0.5, -0.36, 0.17, -0.02, 65e-3);
+allLines{end+1} = VerticalLine(-0.33, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-0.30, -0.17, 0.02, -0.17, 40e-3);
+allLines{end+1} = DiagonalLine(-0.30, -0.17, 0.17, -0.02, 40e-3);
+allLines{end+1} = VerticalLine(-0.15, 0.17, -0.17, 65e-3);
 
-% in FOV:
-allLines{end+1} = VerticalLine(-0.25, 0.25, -0.25, 40e-3);
-allLines{end+1} = DiagonalLine(-0.22, -0.03, -0.25, -0.05, 65e-3);
-allLines{end+1} = DiagonalLine(-0.22, -0.03, -0.1, 0.1, 65e-3);
-allLines{end+1} = DiagonalLine(-0.22, -0.03, 0.05, 0.25, 65e-3);
+% center right:
+allLines{end+1} = VerticalLine(0.15, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(0.17, 0.33, -0.17, 0.02, 40e-3);
+allLines{end+1} = DiagonalLine(0.17, 0.33, -0.02, 0.17, 40e-3);
+allLines{end+1} = VerticalLine(0.33, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(0.36, 0.5, -0.17, 0.02, 65e-3);
+allLines{end+1} = DiagonalLine(0.36, 0.5, -0.02, 0.17, 65e-3);
+allLines{end+1} = VerticalLine(0.525, -0.375, 0.375, 40e-3); % longer
 
-allLines{end+1} = VerticalLine(0.0, 0.25, -0.25, 65e-3);
-allLines{end+1} = DiagonalLine(0.03, 0.22, -0.2, 0.0, 40e-3);
-allLines{end+1} = DiagonalLine(0.03, 0.22, -0.05, 0.15, 40e-3);
-allLines{end+1} = DiagonalLine(0.03, 0.22, 0.1, 0.3, 40e-3);
-
-allLines{end+1} = VerticalLine(0.25, 0.25, -0.25, 65e-3);
-
-% out of FOV
-allLines{end+1} = VerticalLine(0.45, 0.375, -0.375, 65e-3);
-allLines{end+1} = DiagonalLine(0.48, 0.62, 0.375, -0.13, 65e-3);
-allLines{end+1} = DiagonalLine(0.48, 0.62, 0.13, -0.375, 65e-3);
-allLines{end+1} = VerticalLine(0.65, 0.375, -0.375, 40e-3);
-
+allLines{end+1} = VerticalLine(0.75, 0.5, -0.5, 40e-3);
+allLines{end+1} = DiagonalLine(0.88, 0.77, 0.5, -0.5, 65e-3);
 allLines{end+1} = VerticalLine(0.9, 0.5, -0.5, 65e-3);
-allLines{end+1} = VerticalLine(1.1, 0.5, -0.5, 40e-3);
-allLines{end+1} = DiagonalLine(0.93, 1.07, 0.5, -0.5, 40e-3);
 
-
+allLines{end+1} = DiagonalLine(-1, 1, 0.5, 0.5, 65e-3);
 
 %% Convert to arrays
 [xStart_mm, xEnd_mm, yStart_mm, yEnd_mm, z_mm] = linesToArrays(allLines);
 
 %% Plot
 figure(1); clf;
+hold on;
 for ii = 1:numel(allLines)
     plot([xStart_mm(ii), xEnd_mm(ii)], [yStart_mm(ii), yEnd_mm(ii)]);
-    if ii == 1; hold on; end
+
+    % Midpoint of each line for the label
+    x_mid = (xStart_mm(ii) + xEnd_mm(ii)) / 2;
+    y_mid = (yStart_mm(ii) + yEnd_mm(ii)) / 2;
+    text(x_mid, y_mid, sprintf('%d', ii-1), ...
+        'HorizontalAlignment', 'center', ...
+        'VerticalAlignment', 'middle', ...
+        'FontSize', 8, ...
+        'FontWeight', 'bold');
 end
-fov_half = 0.25;
-plot(fov_half*[-1 1 1 -1 -1], fov_half*[-1 -1 1 1 -1], 'k-', 'LineWidth', 2);
+% fov_half = 0.25;
+fov_half_x = 0.525;
+fov_half_y = 0.176;
+
+plot(fov_half_x*[-1 1 1 -1 -1], ...
+     fov_half_y*[-1 -1 1 1 -1], ...
+     'k-', 'LineWidth', 2);
+
 hold off
 axis ij
 axis equal
-
 end
-
 
 function [xStart_mm, xEnd_mm, yStart_mm, yEnd_mm, z_mm] = linesToArrays(lines)
 
