@@ -8,45 +8,45 @@ allLines = {};
 % VerticalLine(x, yStart, yEnd, depth)
 % DiagonalLine(xStart, xEnd, yStart, yEnd, depth)
 
-allLines{end+1} = VerticalLine(-0.9, 0.5, -0.5, 65e-3);
-allLines{end+1} = DiagonalLine(-0.88, -0.77, -0.5, 0.5, 65e-3);
-allLines{end+1} = VerticalLine(-0.75, 0.5, -0.5, 40e-3);
+allLines{end+1} = VerticalLine(-1.4, 0.5, -0.5, 65e-3);
+allLines{end+1} = DiagonalLine(-1.38, -1.27, -0.5, 0.5, 65e-3);
+allLines{end+1} = VerticalLine(-1.25, 0.5, -0.5, 40e-3);
 
 % center left:
-allLines{end+1} = VerticalLine(-0.525, -0.375, 0.375, 40e-3); % longer
-allLines{end+1} = DiagonalLine(-0.5, -0.36, 0.02, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(-0.5, -0.36, 0.17, -0.02, 65e-3);
-allLines{end+1} = VerticalLine(-0.33, 0.17, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(-0.30, -0.17, 0.02, -0.17, 40e-3);
-allLines{end+1} = DiagonalLine(-0.30, -0.17, 0.17, -0.02, 40e-3);
-allLines{end+1} = VerticalLine(-0.15, 0.17, -0.17, 65e-3);
+allLines{end+1} = VerticalLine(-1.025, -0.375, 0.375, 40e-3); % longer
+allLines{end+1} = DiagonalLine(-1.0, -0.86, 0.02, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-1.0, -0.86, 0.17, -0.02, 65e-3);
+allLines{end+1} = VerticalLine(-0.83, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-0.80, -0.67, 0.02, -0.17, 40e-3);
+allLines{end+1} = DiagonalLine(-0.80, -0.67, 0.17, -0.02, 40e-3);
+allLines{end+1} = VerticalLine(-0.65, 0.17, -0.17, 65e-3);
 
 % center right:
-allLines{end+1} = VerticalLine(0.15, 0.17, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(0.17, 0.33, -0.17, 0.02, 40e-3);
-allLines{end+1} = DiagonalLine(0.17, 0.33, -0.02, 0.17, 40e-3);
-allLines{end+1} = VerticalLine(0.33, 0.17, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(0.36, 0.5, -0.17, 0.02, 65e-3);
-allLines{end+1} = DiagonalLine(0.36, 0.5, -0.02, 0.17, 65e-3);
-allLines{end+1} = VerticalLine(0.525, -0.375, 0.375, 40e-3); % longer
+allLines{end+1} = VerticalLine(-0.35, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-0.33, -0.17, -0.17, 0.02, 40e-3);
+allLines{end+1} = DiagonalLine(-0.33, -0.17, -0.02, 0.17, 40e-3);
+allLines{end+1} = VerticalLine(-0.17, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(-0.14, 0.0, -0.17, 0.02, 65e-3);
+allLines{end+1} = DiagonalLine(-0.14, 0.0, -0.02, 0.17, 65e-3);
+allLines{end+1} = VerticalLine(0.025, -0.375, 0.375, 40e-3); % longer
 
-allLines{end+1} = VerticalLine(0.75, 0.5, -0.5, 40e-3);
-allLines{end+1} = DiagonalLine(0.88, 0.77, 0.5, -0.5, 65e-3);
-allLines{end+1} = VerticalLine(0.9, 0.5, -0.5, 65e-3);
+allLines{end+1} = VerticalLine(0.25, 0.5, -0.5, 40e-3);
+allLines{end+1} = DiagonalLine(0.38, 0.27, 0.5, -0.5, 65e-3);
+allLines{end+1} = VerticalLine(0.4, 0.5, -0.5, 65e-3);
 
-allLines{end+1} = VerticalLine(1.15, 0.17, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(1.17, 1.33, -0.17, 0.02, 40e-3);
-allLines{end+1} = DiagonalLine(1.17, 1.33, -0.02, 0.17, 40e-3);
-allLines{end+1} = VerticalLine(1.33, 0.17, -0.17, 65e-3);
-allLines{end+1} = DiagonalLine(1.36, 1.5, -0.17, 0.02, 65e-3);
-allLines{end+1} = DiagonalLine(1.36, 1.5, -0.02, 0.17, 65e-3);
-allLines{end+1} = VerticalLine(1.525, -0.17, 0.17, 40e-3); % longer
+allLines{end+1} = VerticalLine(0.65, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(0.67, 0.83, -0.17, 0.02, 40e-3);
+allLines{end+1} = DiagonalLine(0.67, 0.83, -0.02, 0.17, 40e-3);
+allLines{end+1} = VerticalLine(0.83, 0.17, -0.17, 65e-3);
+allLines{end+1} = DiagonalLine(0.86, 1.0, -0.17, 0.02, 65e-3);
+allLines{end+1} = DiagonalLine(0.86, 1.0, -0.02, 0.17, 65e-3);
+allLines{end+1} = VerticalLine(1.025, -0.17, 0.17, 40e-3); % longer
 
-allLines{end+1} = VerticalLine(1.75, 0.5, -0.5, 40e-3);
-allLines{end+1} = DiagonalLine(1.88, 1.77, 0.5, -0.5, 65e-3);
-allLines{end+1} = VerticalLine(1.9, 0.5, -0.5, 65e-3);
+allLines{end+1} = VerticalLine(1.25, 0.5, -0.5, 40e-3);
+allLines{end+1} = DiagonalLine(1.38, 1.27, 0.5, -0.5, 65e-3);
+allLines{end+1} = VerticalLine(1.4, 0.5, -0.5, 65e-3);
 
-allLines{end+1} = DiagonalLine(-1, 2, 0.5, 0.5, 65e-3);
+allLines{end+1} = DiagonalLine(-1.5, 1.5, 0.5, 0.5, 65e-3);
 
 %% Convert to arrays
 [xStart_mm, xEnd_mm, yStart_mm, yEnd_mm, z_mm] = linesToArrays(allLines);
